@@ -11,3 +11,4 @@
 5. Branch 选择 main，目录选择 /(root)，然后保存。
 
 发布后，GitHub Pages 会在该页面显示公开网址。
+网站发布更新
