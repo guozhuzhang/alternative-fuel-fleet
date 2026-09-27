@@ -4,405 +4,447 @@
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const numberFormat = new Intl.NumberFormat("zh-CN");
-  const percentFormat = new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
-  const state = { market: "both", metric: "count", fuel: "all", ship: "all", matrixMarket: "fleet", matrixMode: "absolute" };
-  const colors = { fleet: "#0f8f83", order: "#f28c45", muted: "#dce6e7", ink: "#15313a" };
+  const percentFormat = new Intl.NumberFormat("zh-CN", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const state = { market: "both", metric: "count", fuel: "all", ship: "all", matrixMarket: "fleet", matrixMode: "absolute", topic: "lng" };
+  const colors = { fleet: "#0f8f83", order: "#ed8742", total: "#0b3944", lng: "#245995", methanol: "#25a18e" };
   let data;
 
   const escapeHtml = (value) => String(value).replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char]));
   const formatDate = (value) => new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
-  const formatWan = (value) => Number((Number(value || 0) / 10000).toFixed(2)).toLocaleString("zh-CN", { maximumFractionDigits: 2 });
-  const formatPercent = (value) => `${percentFormat.format(Number(value || 0) * 100)}%`;
-  const rawMetric = () => state.metric === "gt" ? "gt" : "count";
-  const metricLabel = () => state.metric === "gt" ? "万GT" : state.metric === "share" ? "艘数占比" : "艘";
-  const metricValue = (record) => state.metric === "gt" ? Number(record?.gt || 0) : Number(record?.count || 0);
-  const metricText = (value) => state.metric === "gt" ? `${formatWan(value)}万GT` : state.metric === "share" ? `${percentFormat.format(value)}%` : `${numberFormat.format(Math.round(value))}艘`;
+  const formatWan = (value) => Number(Number(value || 0) / 10000).toLocaleString("zh-CN", { maximumFractionDigits: 2 });
+  const formatPct = (value) => `${percentFormat.format(Number(value || 0) * 100)}%`;
+  const formatMetric = (value) => state.metric === "gt" ? formatWan(value) : numberFormat.format(Math.round(value));
   const marketName = (key) => key === "fleet" ? "投用" : "订单";
   const selectedMarkets = () => state.market === "both" ? ["fleet", "order"] : [state.market];
-  const fuelLabel = (key) => data.markets.fleet.fuels.find((fuel) => fuel.key === key)?.label || key;
-  const totalForMarket = (key) => data.markets[key];
+  const metricKey = () => state.metric === "gt" ? "gt" : "count";
+  const fuelObject = (market, fuelKey) => data.markets[market].fuels.find((fuel) => fuel.key === fuelKey) || { count: 0, gt: 0, singleCount: 0, comboCount: 0 };
+  const fuelLabel = (fuelKey) => fuelObject("fleet", fuelKey).label || fuelKey;
 
-  function filteredSummary(key) {
+  function renderHeader() {
+    $("#snapshotDate").textContent = `数据快照 · ${data.asOf}`;
+    $("#asOfChip").textContent = `截至${formatDate(data.asOf)}`;
+    $("#sourceLine").textContent = `${data.source} · ${data.asOf}`;
+    $("#sourceNote").textContent = `数据来源：${data.source}，${data.attribution}`;
+    $("#dataBoundary").textContent = `统计日期：${data.asOf}。Fuel Ready当前仅提供汇总数据。`;
+    $("#footerSource").textContent = `${data.source}，截至${data.asOf}，${data.attribution}`;
+  }
+
+  function marketCard(key) {
     const market = data.markets[key];
+    const countShare = data.globalShares[`${key}Count`];
+    const gtShare = data.globalShares[`${key}Gt`];
+    return `<div class="market-head"><div><span>${key === "fleet" ? "IN SERVICE" : "ORDERBOOK"}</span><b>${key === "fleet" ? "已投用替代燃料船舶" : "替代燃料船舶订单"}</b></div><i class="market-tag">${key === "fleet" ? "Fleet" : "Order"}</i></div>
+      <div class="market-numbers">
+        <div class="market-number"><small>船舶数量</small><strong>${numberFormat.format(market.count)}艘</strong><span>占全球${key === "fleet" ? "船队" : "订单"}艘数 ${formatPct(countShare)}</span></div>
+        <div class="market-number"><small>总吨（GT）</small><strong>${formatWan(market.gt)}万</strong><span>占全球${key === "fleet" ? "船队" : "订单"}总吨（GT） ${formatPct(gtShare)}</span></div>
+      </div>
+      <div class="market-shares"><span>平均单船 <b>${formatWan(market.averageGt)}万GT</b></span><span>数据口径 <b>${data.asOf}</b></span></div>`;
+  }
+
+  function renderOverview() {
+    $("#fleetCard").innerHTML = marketCard("fleet");
+    $("#orderCard").innerHTML = marketCard("order");
+    $("#readySnapshot").innerHTML = `<span>FUEL READY · 单列统计</span><h3>未来燃料转换准备能力</h3><div class="ready-list">
+      <div class="ready-item"><div><span>投用Ready</span><b>${numberFormat.format(data.ready.fleet.count)}艘</b></div><small>${formatWan(data.ready.fleet.gt)}万GT</small></div>
+      <div class="ready-item"><div><span>订单Ready</span><b>${numberFormat.format(data.ready.order.count)}艘</b></div><small>${formatWan(data.ready.order.gt)}万GT</small></div>
+    </div><p class="ready-warning">Ready不代表船舶已经使用替代燃料，也不与替代燃料船舶总量相加。</p>`;
+    renderTrendChart("#fleetTrend", "fleet");
+    renderTrendChart("#orderTrend", "order");
+  }
+
+  function trendPath(rows, key, x, y) {
+    return rows.map((row, index) => `${index ? "L" : "M"}${x(index).toFixed(1)},${y(row[key]).toFixed(1)}`).join(" ");
+  }
+
+  function renderTrendChart(selector, marketKey, onlyFuel = null) {
+    const node = $(selector);
+    const rows = data.trends?.series || [];
+    if (rows.length < 2) { node.innerHTML = '<div class="empty-state">连续月度数据不足</div>'; return; }
+    const series = onlyFuel ? [{ key: `${onlyFuel}GtShare`, label: fuelLabel(onlyFuel), className: onlyFuel }] : [
+      { key: "totalGtShare", label: "替代燃料", className: "total" },
+      { key: "lngGtShare", label: "LNG", className: "lng" },
+      { key: "methanolGtShare", label: "甲醇", className: "methanol" },
+    ];
+    const values = rows.flatMap((row) => series.map((item) => Number(row[marketKey][item.key] || 0)));
+    const width = 760, height = 285, left = 44, right = 20, top = 17, bottom = 36;
+    const plotWidth = width - left - right, plotHeight = height - top - bottom;
+    const rawMax = Math.max(...values, 0.01);
+    const step = rawMax > .25 ? .1 : rawMax > .1 ? .025 : rawMax > .03 ? .01 : .002;
+    const max = Math.ceil(rawMax / step) * step;
+    const x = (index) => left + index / (rows.length - 1) * plotWidth;
+    const y = (value) => top + plotHeight - Number(value || 0) / max * plotHeight;
+    let svg = `<svg viewBox="0 0 ${width} ${height}" aria-hidden="true">`;
+    for (let index = 0; index <= 4; index += 1) {
+      const value = max * index / 4;
+      const yy = y(value);
+      svg += `<line class="grid-line" x1="${left}" x2="${width - right}" y1="${yy}" y2="${yy}"></line><text class="chart-tick" x="${left - 7}" y="${yy + 3}" text-anchor="end">${percentFormat.format(value * 100)}%</text>`;
+    }
+    rows.forEach((row, index) => {
+      if (index % 6 === 0 || index === rows.length - 1) svg += `<text class="chart-tick" x="${x(index)}" y="${height - 10}" text-anchor="middle">${escapeHtml(row.period)}</text>`;
+    });
+    series.forEach((item) => {
+      svg += `<path class="line-${item.className}" d="${trendPath(rows.map((row) => row[marketKey]), item.key, x, y)}"></path>`;
+      rows.forEach((row, index) => {
+        const value = row[marketKey][item.key];
+        const radius = index === rows.length - 1 ? 4.2 : 2.2;
+        svg += `<circle class="data-point ${item.className}" cx="${x(index)}" cy="${y(value)}" r="${radius}" data-tip="${escapeHtml(`${row.period}｜${marketName(marketKey)}${item.label}｜${formatPct(value)}`)}"></circle>`;
+      });
+    });
+    svg += `</svg>`;
+    node.innerHTML = svg;
+  }
+
+  function renderFuelComparisonTrend(selector, fuelKey) {
+    const node = $(selector);
+    const rows = data.trends?.series || [];
+    if (rows.length < 2) { node.innerHTML = '<div class="empty-state">连续月度数据不足</div>'; return; }
+    const field = `${fuelKey}GtShare`;
+    const width = 760, height = 285, left = 44, right = 20, top = 17, bottom = 36;
+    const plotWidth = width - left - right, plotHeight = height - top - bottom;
+    const values = rows.flatMap((row) => [Number(row.fleet[field] || 0), Number(row.order[field] || 0)]);
+    const rawMax = Math.max(...values, .01);
+    const step = rawMax > .25 ? .1 : rawMax > .1 ? .025 : rawMax > .03 ? .01 : .002;
+    const max = Math.ceil(rawMax / step) * step;
+    const x = (index) => left + index / (rows.length - 1) * plotWidth;
+    const y = (value) => top + plotHeight - Number(value || 0) / max * plotHeight;
+    let svg = `<svg viewBox="0 0 ${width} ${height}" aria-hidden="true">`;
+    for (let index = 0; index <= 4; index += 1) {
+      const value = max * index / 4;
+      const yy = y(value);
+      svg += `<line class="grid-line" x1="${left}" x2="${width - right}" y1="${yy}" y2="${yy}"></line><text class="chart-tick" x="${left - 7}" y="${yy + 3}" text-anchor="end">${percentFormat.format(value * 100)}%</text>`;
+    }
+    rows.forEach((row, index) => {
+      if (index % 6 === 0 || index === rows.length - 1) svg += `<text class="chart-tick" x="${x(index)}" y="${height - 10}" text-anchor="middle">${escapeHtml(row.period)}</text>`;
+    });
+    for (const marketKey of ["fleet", "order"]) {
+      const marketRows = rows.map((row) => row[marketKey]);
+      svg += `<path class="line-${marketKey}" d="${trendPath(marketRows, field, x, y)}"></path>`;
+      rows.forEach((row, index) => {
+        const value = row[marketKey][field];
+        svg += `<circle class="data-point ${marketKey}" cx="${x(index)}" cy="${y(value)}" r="${index === rows.length - 1 ? 4.2 : 2.2}" data-tip="${escapeHtml(`${row.period}｜${marketName(marketKey)}${fuelLabel(fuelKey)}｜${formatPct(value)}`)}"></circle>`;
+      });
+    }
+    node.innerHTML = `${svg}</svg>`;
+  }
+
+  function renderTopic() {
+    $$("#topicTabs button").forEach((button) => {
+      const active = button.dataset.topic === state.topic;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+    });
+    if (state.topic === "battery") return renderBatteryTopic();
+    if (state.topic === "other") return renderOtherTopic();
+    renderFuelTopic(state.topic);
+  }
+
+  function topicMetric(label, value, note) {
+    return `<div class="topic-metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></div>`;
+  }
+
+  function renderFuelTopic(fuelKey) {
+    const fleet = fuelObject("fleet", fuelKey);
+    const order = fuelObject("order", fuelKey);
+    const names = fuelKey === "lng" ? { code: "LNG", title: "LNG动力船舶", description: "投用规模、订单规模、总吨（GT）占比趋势与主要船型。" } : { code: "MeOH", title: "甲醇动力船舶", description: "投用规模、订单规模、总吨（GT）占比趋势与主要船型。" };
+    $("#topicCode").textContent = names.code;
+    $("#topicTitle").textContent = names.title;
+    $("#topicDescription").textContent = names.description;
+    $("#topicNote").textContent = "燃料总计包含单一燃料及组合参与，组合船可同时进入相关燃料类别。";
+    $("#topicMetrics").innerHTML = [
+      topicMetric("投用", `${numberFormat.format(fleet.count)}艘`, `${formatWan(fleet.gt)}万GT`),
+      topicMetric("订单", `${numberFormat.format(order.count)}艘`, `${formatWan(order.gt)}万GT`),
+      topicMetric("投用结构", `${numberFormat.format(fleet.singleCount)}＋${numberFormat.format(fleet.comboCount)}`, "单一燃料＋组合参与"),
+      topicMetric("订单结构", `${numberFormat.format(order.singleCount)}＋${numberFormat.format(order.comboCount)}`, "单一燃料＋组合参与"),
+    ].join("");
+    $("#topicTrendTitle").textContent = `${fuelLabel(fuelKey)}投用 / 订单总吨占比趋势`;
+    $("#topicTrendUnit").textContent = "绿色：投用 · 橙色：订单";
+    $("#topicShipsTitle").textContent = `${fuelLabel(fuelKey)}主要船型`;
+    renderFuelComparisonTrend("#topicTrend", fuelKey);
+    renderTopicShips(fuelKey);
+  }
+
+  function fuelShipRows(fuelKey) {
+    const labels = [...new Set([...data.markets.fleet.ships, ...data.markets.order.ships].map((ship) => ship.label))];
+    return labels.map((label) => {
+      const fleet = data.markets.fleet.ships.find((ship) => ship.label === label)?.fuels[fuelKey] || { count: 0, gt: 0 };
+      const order = data.markets.order.ships.find((ship) => ship.label === label)?.fuels[fuelKey] || { count: 0, gt: 0 };
+      return { label, fleet, order, total: fleet.count + order.count };
+    }).filter((row) => row.total > 0).sort((a, b) => b.total - a.total);
+  }
+
+  function renderTopicShips(fuelKey) {
+    const rows = fuelShipRows(fuelKey).slice(0, 9);
+    if (!rows.length) { $("#topicShips").innerHTML = '<div class="empty-state">暂无船型分布</div>'; return; }
+    const max = Math.max(...rows.flatMap((row) => [row.fleet.count, row.order.count]), 1);
+    $("#topicShips").innerHTML = `<div class="fuel-list">${rows.map((row) => `<div class="fuel-list-row"><label title="${escapeHtml(row.label)}">${escapeHtml(row.label)}</label><div class="track"><i class="f" style="width:${row.fleet.count / max * 50}%"></i><i class="o" style="width:${row.order.count / max * 50}%"></i></div><b>${numberFormat.format(row.fleet.count)} / ${numberFormat.format(row.order.count)}</b></div>`).join("")}</div>`;
+  }
+
+  function renderBatteryTopic() {
+    const fleet = data.battery.fleet, order = data.battery.order;
+    $("#topicCode").textContent = "EV";
+    $("#topicTitle").textContent = "电池动力船舶";
+    $("#topicDescription").textContent = "纯电动单列，其余电池相关动力统一归入混合动力。";
+    $("#topicNote").textContent = "电池动力采用专项口径，不与各替代燃料类别简单相加。";
+    $("#topicMetrics").innerHTML = [
+      topicMetric("投用电池动力", `${numberFormat.format(fleet.count)}艘`, `${formatWan(fleet.gt)}万GT`),
+      topicMetric("投用构成", `${fleet.pure} / ${fleet.hybrid}`, "纯电 / 混合动力"),
+      topicMetric("电池动力订单", `${numberFormat.format(order.count)}艘`, `${formatWan(order.gt)}万GT`),
+      topicMetric("订单构成", `${order.pure} / ${order.hybrid}`, "纯电 / 混合动力"),
+    ].join("");
+    $("#topicTrendTitle").textContent = "投用电池动力结构";
+    $("#topicTrendUnit").textContent = "纯电 / 混合动力";
+    $("#topicShipsTitle").textContent = "订单电池动力结构";
+    $("#topicTrend").innerHTML = batteryBlock("投用", fleet);
+    $("#topicShips").innerHTML = batteryBlock("订单", order);
+  }
+
+  function batteryBlock(label, record) {
+    const pureShare = record.count ? record.pure / record.count : 0;
+    const hybridShare = 1 - pureShare;
+    return `<div class="battery-topic"><div><div class="battery-row-head"><span>${label}电池动力</span><strong>${numberFormat.format(record.count)}艘</strong></div><div class="battery-stack"><i class="pure" style="width:${pureShare * 100}%">${formatPct(pureShare)}</i><i class="hybrid" style="width:${hybridShare * 100}%">${formatPct(hybridShare)}</i></div><div class="battery-detail"><span>纯电 ${numberFormat.format(record.pure)}艘</span><span>混合动力 ${numberFormat.format(record.hybrid)}艘</span></div></div></div>`;
+  }
+
+  function renderOtherTopic() {
+    const excluded = new Set(["lng", "methanol", "other"]);
+    const rows = data.markets.fleet.fuels.filter((fuel) => !excluded.has(fuel.key) && (fuel.count || fuelObject("order", fuel.key).count)).map((fuel) => ({ label: fuel.label, fleet: fuel, order: fuelObject("order", fuel.key) })).sort((a, b) => b.fleet.count + b.order.count - a.fleet.count - a.order.count);
+    $("#topicCode").textContent = "ALT";
+    $("#topicTitle").textContent = "其他替代燃料";
+    $("#topicDescription").textContent = "LPG、生物燃料、氨、氢、乙烷、乙醇与核能的分类汇总。";
+    $("#topicNote").textContent = "不同燃料可能包含组合参与，不能将各燃料艘数相加后解释为唯一船舶总量。";
+    const topFleet = [...rows].sort((a, b) => b.fleet.count - a.fleet.count)[0];
+    const topOrder = [...rows].sort((a, b) => b.order.count - a.order.count)[0];
+    $("#topicMetrics").innerHTML = [
+      topicMetric("投用最多", topFleet.label, `${numberFormat.format(topFleet.fleet.count)}艘`),
+      topicMetric("订单最多", topOrder.label, `${numberFormat.format(topOrder.order.count)}艘`),
+      topicMetric("分类数量", `${rows.length}类`, "公开燃料类别"),
+      topicMetric("组合燃料", `${data.markets.fleet.combinations.count} / ${data.markets.order.combinations.count}`, "投用 / 订单"),
+    ].join("");
+    $("#topicTrendTitle").textContent = "投用燃料结构";
+    $("#topicTrendUnit").textContent = "按艘数";
+    $("#topicShipsTitle").textContent = "订单燃料结构";
+    $("#topicTrend").innerHTML = renderFuelList(rows, "fleet");
+    $("#topicShips").innerHTML = renderFuelList(rows, "order");
+  }
+
+  function renderFuelList(rows, marketKey) {
+    const max = Math.max(...rows.map((row) => row[marketKey].count), 1);
+    return `<div class="fuel-list">${rows.map((row) => `<div class="fuel-list-row"><label>${escapeHtml(row.label)}</label><div class="track"><i class="${marketKey === "fleet" ? "f" : "o"}" style="width:${row[marketKey].count / max * 100}%"></i></div><b>${numberFormat.format(row[marketKey].count)}艘</b></div>`).join("")}</div>`;
+  }
+
+  function filteredSummary(marketKey) {
+    const market = data.markets[marketKey];
     if (state.ship !== "all") {
       const ship = market.ships.find((item) => item.label === state.ship);
       if (!ship) return { count: 0, gt: 0 };
-      if (state.fuel === "all") return { count: ship.count, gt: ship.gt };
-      return ship.fuels[state.fuel] || { count: 0, gt: 0 };
+      return state.fuel === "all" ? { count: ship.count, gt: ship.gt } : (ship.fuels[state.fuel] || { count: 0, gt: 0 });
     }
-    if (state.fuel !== "all") return market.fuels.find((item) => item.key === state.fuel) || { count: 0, gt: 0 };
-    return { count: market.count, gt: market.gt };
+    return state.fuel === "all" ? { count: market.count, gt: market.gt } : fuelObject(marketKey, state.fuel);
   }
 
-  function fuelRows() {
-    let fuels = data.markets.fleet.fuels.filter((fuel) => fuel.count || data.markets.order.fuels.find((item) => item.key === fuel.key)?.count);
-    if (state.fuel !== "all") fuels = fuels.filter((fuel) => fuel.key === state.fuel);
-    return fuels.map((fuel) => {
-      const values = {};
-      for (const key of ["fleet", "order"]) {
-        if (state.ship === "all") values[key] = data.markets[key].fuels.find((item) => item.key === fuel.key) || { count: 0, gt: 0 };
-        else values[key] = data.markets[key].ships.find((ship) => ship.label === state.ship)?.fuels[fuel.key] || { count: 0, gt: 0 };
-      }
-      return { key: fuel.key, label: fuel.label, ...values };
-    });
-  }
-
-  function shipRows() {
+  function databaseShipRows() {
     const labels = [...new Set([...data.markets.fleet.ships, ...data.markets.order.ships].map((ship) => ship.label))];
-    let rows = labels.map((label) => {
+    return labels.map((label) => {
       const result = { label };
       for (const key of ["fleet", "order"]) {
         const ship = data.markets[key].ships.find((item) => item.label === label);
         result[key] = state.fuel === "all" ? (ship || { count: 0, gt: 0 }) : (ship?.fuels[state.fuel] || { count: 0, gt: 0 });
       }
       return result;
-    });
-    if (state.ship !== "all") rows = rows.filter((row) => row.label === state.ship);
-    return rows;
+    }).filter((row) => state.ship === "all" || row.label === state.ship);
   }
 
-  function renderHero() {
-    const fleet = data.markets.fleet;
-    const order = data.markets.order;
-    const countRatio = order.count / fleet.count;
-    const gtRatio = order.gt / fleet.gt;
-    $("#snapshotDate").textContent = `数据快照 · ${data.asOf}`;
-    $("#asOfChip").textContent = `截至${formatDate(data.asOf)}`;
-    $("#sourceEyebrow").textContent = `${data.source} · ${data.asOf}`;
-    $("#heroVisual").innerHTML = `<div class="ratio-visual">
-      <div class="ratio-title"><div><span>订单 / 投用规模比</span><b>${formatPercent(gtRatio)}</b></div><small>按GT</small></div>
-      <div class="ratio-track"><i style="width:${Math.min(100, gtRatio * 100)}%"></i></div>
-      <div class="ratio-scale"><span>0</span><span>投用规模 100%</span></div>
-      <div class="ratio-grid"><div class="ratio-cell"><span>按艘数</span><b>${formatPercent(countRatio)}</b></div><div class="ratio-cell"><span>订单平均单船GT</span><b>${formatWan(order.averageGt)}万</b></div></div>
-    </div>`;
-    $("#sourceNote").textContent = `数据来源：${data.source}，${data.attribution}`;
-    $("#dataBoundary").textContent = `统计日期：${data.asOf}。Fuel Ready当前仅提供汇总数据。`;
-    $("#footerSource").textContent = `${data.source}，截至${data.asOf}，${data.attribution}`;
+  function renderDatabase() {
+    const fuelText = state.fuel === "all" ? "全部燃料" : fuelLabel(state.fuel);
+    const shipText = state.ship === "all" ? "全部船型" : state.ship;
+    $("#filterStatus").textContent = `当前查询：${state.market === "both" ? "投用＋订单" : marketName(state.market)} · ${state.metric === "gt" ? "总吨（GT）" : "艘数"} · ${fuelText} · ${shipText}`;
+    renderShipBars();
+    renderQuerySummary();
+    renderMatrix();
+    updateUrl();
   }
 
-  function renderKpis() {
-    const fleet = filteredSummary("fleet");
-    const order = filteredSummary("order");
-    const key = rawMetric();
-    let cards;
-    if (state.market === "both") {
-      const ratio = fleet[key] ? order[key] / fleet[key] : 0;
-      const fleetAverage = fleet.count ? fleet.gt / fleet.count : 0;
-      const orderAverage = order.count ? order.gt / order.count : 0;
-      cards = [
-        ["筛选范围内投用", `${numberFormat.format(fleet.count)}艘`, `${formatWan(fleet.gt)}万GT`, "fleet"],
-        ["筛选范围内订单", `${numberFormat.format(order.count)}艘`, `${formatWan(order.gt)}万GT`, "order"],
-        ["订单 / 投用规模比", formatPercent(ratio), state.metric === "gt" ? "按GT计算" : "按艘数计算", "ratio"],
-        ["平均单船GT", `${formatWan(orderAverage)}万`, `订单；投用为${formatWan(fleetAverage)}万`, "average"],
-      ];
-    } else {
-      const item = state.market === "fleet" ? fleet : order;
-      const total = totalForMarket(state.market);
-      const countShare = item.count / Math.max(1, total.count);
-      const gtShare = item.gt / Math.max(1, total.gt);
-      cards = [
-        [`${marketName(state.market)}艘数`, `${numberFormat.format(item.count)}艘`, `占全部${marketName(state.market)} ${formatPercent(countShare)}`, state.market],
-        [`${marketName(state.market)}总吨`, `${formatWan(item.gt)}万GT`, `占全部${marketName(state.market)} ${formatPercent(gtShare)}`, state.market],
-        ["平均单船GT", `${formatWan(item.count ? item.gt / item.count : 0)}万`, "筛选范围内GT / 艘数", "average"],
-        ["统计范围", state.fuel === "all" ? "全部燃料" : fuelLabel(state.fuel), state.ship === "all" ? "全部船型" : state.ship, "ratio"],
-      ];
-    }
-    $("#kpiGrid").innerHTML = cards.map(([label, value, note, style]) => `<article class="kpi-card ${style}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`).join("");
+  function renderShipBars() {
+    const key = metricKey();
+    const markets = selectedMarkets();
+    const rows = databaseShipRows().map((row) => ({ ...row, total: markets.reduce((sum, market) => sum + row[market][key], 0) })).filter((row) => row.total > 0).sort((a, b) => b.total - a.total).slice(0, 12);
+    if (!rows.length) { $("#shipBars").innerHTML = '<div class="empty-state">当前查询没有船型记录</div>'; return; }
+    const max = Math.max(...rows.flatMap((row) => markets.map((market) => row[market][key])), 1);
+    $("#shipBars").innerHTML = rows.map((row) => `<div class="ship-row"><label title="${escapeHtml(row.label)}">${escapeHtml(row.label)}</label><div class="dual-track"><div>${markets.includes("fleet") ? `<i class="fleet" style="width:${row.fleet[key] / max * 100}%"></i>` : ""}</div><div>${markets.includes("order") ? `<i class="order" style="width:${row.order[key] / max * 100}%"></i>` : ""}</div></div><b>${formatMetric(row.total)}${state.metric === "gt" ? "万GT" : "艘"}</b></div>`).join("");
   }
 
-  function renderInsights() {
-    const fleet = filteredSummary("fleet");
-    const order = filteredSummary("order");
-    const countRatio = fleet.count ? order.count / fleet.count : 0;
-    const avgFleet = fleet.count ? fleet.gt / fleet.count : 0;
-    const avgOrder = order.count ? order.gt / order.count : 0;
-    const rows = fuelRows().map((row) => ({ ...row, total: row.fleet.count + row.order.count })).sort((a, b) => b.total - a.total);
-    const leader = rows[0];
-    const avgDelta = avgFleet ? avgOrder / avgFleet - 1 : 0;
-    const insights = [
-      ["01", "订单规模", fleet.count ? `订单艘数相当于投用规模的${formatPercent(countRatio)}。` : "当前筛选没有可比投用规模。"],
-      ["02", "船舶尺度", avgFleet ? `订单平均单船GT比投用${avgDelta >= 0 ? "高" : "低"}${formatPercent(Math.abs(avgDelta))}。` : "当前筛选缺少平均GT比较基础。"],
-      ["03", "最大燃料类别", leader ? `${leader.label}在当前筛选中的投用与订单合计最多。` : "当前筛选没有燃料记录。"],
-    ];
-    $("#insightStrip").innerHTML = insights.map(([no, title, text]) => `<article class="insight"><span>${no}</span><div><b>${escapeHtml(title)}</b><p>${escapeHtml(text)}</p></div></article>`).join("");
-  }
-
-  function scaleTicks(max, count = 4) {
-    return Array.from({ length: count + 1 }, (_, index) => max * index / count);
-  }
-
-  function displayValue(raw, marketKey, denominator) {
-    if (state.metric === "share") return denominator ? raw.count / denominator.count * 100 : 0;
-    return metricValue(raw);
-  }
-
-  function renderFuelComparison() {
-    const series = selectedMarkets();
-    const rows = fuelRows().map((row) => {
-      const values = {};
-      for (const key of ["fleet", "order"]) {
-        const denominator = state.ship === "all" ? data.markets[key] : (data.markets[key].ships.find((ship) => ship.label === state.ship) || { count: 0, gt: 0 });
-        values[key] = displayValue(row[key], key, denominator);
-      }
-      return { ...row, values, sortValue: series.reduce((sum, key) => sum + values[key], 0) };
-    }).filter((row) => row.sortValue > 0).sort((a, b) => b.sortValue - a.sortValue);
-    const node = $("#fuelComparison");
-    if (!rows.length) { node.innerHTML = '<div class="empty-state">当前筛选没有燃料记录</div>'; return; }
-    const width = 900, rowHeight = series.length === 2 ? 48 : 37, height = rows.length * rowHeight + 55, left = 116, right = 95, top = 27, plotWidth = width - left - right;
-    const max = Math.max(1, ...rows.flatMap((row) => series.map((key) => row.values[key])));
-    const ticks = scaleTicks(max);
-    let svg = `<svg viewBox="0 0 ${width} ${height}" aria-hidden="true">`;
-    ticks.forEach((tick) => { const x = left + tick / max * plotWidth; svg += `<line class="grid-line" x1="${x}" y1="${top - 10}" x2="${x}" y2="${height - 24}"></line><text class="chart-tick" x="${x}" y="${height - 8}" text-anchor="middle">${state.metric === "gt" ? formatWan(tick) : state.metric === "share" ? `${percentFormat.format(tick)}%` : numberFormat.format(Math.round(tick))}</text>`; });
-    rows.forEach((row, index) => {
-      const y = top + index * rowHeight;
-      svg += `<text class="chart-label" x="0" y="${y + (series.length === 2 ? 16 : 14)}">${escapeHtml(row.label)}</text>`;
-      series.forEach((key, seriesIndex) => {
-        const value = row.values[key], barY = y + seriesIndex * 15, barWidth = value / max * plotWidth;
-        const valueText = state.metric === "gt" ? `${formatWan(value)}万` : state.metric === "share" ? `${percentFormat.format(value)}%` : numberFormat.format(Math.round(value));
-        const tipText = `${row.label}｜${marketName(key)}：${state.metric === "gt" ? `${formatWan(row[key].gt)}万GT` : state.metric === "share" ? `${percentFormat.format(value)}%（${numberFormat.format(row[key].count)}艘）` : `${numberFormat.format(row[key].count)}艘`}`;
-        svg += `<g class="chart-hit" data-fuel="${row.key}" data-tip="${escapeHtml(tipText)}"><rect x="${left}" y="${barY}" width="${plotWidth}" height="10" rx="5" fill="#edf2f2"></rect><rect class="${key}-fill" x="${left}" y="${barY}" width="${Math.max(value ? 2 : 0, barWidth)}" height="10" rx="5"></rect><text class="chart-value" x="${left + plotWidth + 8}" y="${barY + 8}">${valueText}</text></g>`;
-      });
-    });
-    node.innerHTML = `${svg}</svg>`;
-    bindChartInteractions(node, "fuel");
-  }
-
-  function renderFuelShift() {
-    const node = $("#fuelShift");
-    $("#shareUnit").textContent = state.metric === "gt" ? "GT占比" : "艘数占比";
-    if (state.market !== "both") { node.innerHTML = '<div class="empty-state">切换到“投用＋订单”查看占比变化</div>'; return; }
-    const key = rawMetric();
-    const denominator = {
-      fleet: state.ship === "all" ? data.markets.fleet[key] : (data.markets.fleet.ships.find((ship) => ship.label === state.ship)?.[key] || 0),
-      order: state.ship === "all" ? data.markets.order[key] : (data.markets.order.ships.find((ship) => ship.label === state.ship)?.[key] || 0),
-    };
-    const rows = fuelRows().map((row) => ({
-      ...row,
-      fleetShare: denominator.fleet ? row.fleet[key] / denominator.fleet * 100 : 0,
-      orderShare: denominator.order ? row.order[key] / denominator.order * 100 : 0,
-    })).filter((row) => row.fleetShare || row.orderShare).sort((a, b) => Math.max(b.fleetShare, b.orderShare) - Math.max(a.fleetShare, a.orderShare));
-    if (!rows.length) { node.innerHTML = '<div class="empty-state">当前筛选没有可比较记录</div>'; return; }
-    const width = 610, rowHeight = 39, height = rows.length * rowHeight + 54, left = 96, right = 72, top = 25, plotWidth = width - left - right;
-    const max = Math.max(5, ...rows.flatMap((row) => [row.fleetShare, row.orderShare])) * 1.05;
-    const ticks = scaleTicks(max);
-    let svg = `<svg viewBox="0 0 ${width} ${height}" aria-hidden="true">`;
-    ticks.forEach((tick) => { const x = left + tick / max * plotWidth; svg += `<line class="grid-line" x1="${x}" y1="${top - 10}" x2="${x}" y2="${height - 24}"></line><text class="chart-tick" x="${x}" y="${height - 8}" text-anchor="middle">${percentFormat.format(tick)}%</text>`; });
-    rows.forEach((row, index) => {
-      const y = top + index * rowHeight + 8, x1 = left + row.fleetShare / max * plotWidth, x2 = left + row.orderShare / max * plotWidth, delta = row.orderShare - row.fleetShare;
-      const tipText = `${row.label}｜投用${percentFormat.format(row.fleetShare)}%，订单${percentFormat.format(row.orderShare)}%，变化${delta >= 0 ? "+" : ""}${percentFormat.format(delta)}个百分点`;
-      svg += `<g class="chart-hit" data-fuel="${row.key}" data-tip="${escapeHtml(tipText)}"><text class="chart-label" x="0" y="${y + 3}">${escapeHtml(row.label)}</text><line x1="${Math.min(x1, x2)}" y1="${y}" x2="${Math.max(x1, x2)}" y2="${y}" stroke="#bfcaca" stroke-width="3" stroke-linecap="round"></line><circle cx="${x1}" cy="${y}" r="6" class="fleet-fill"></circle><circle cx="${x2}" cy="${y}" r="6" class="order-fill"></circle><text class="chart-value" x="${left + plotWidth + 8}" y="${y + 3}">${delta >= 0 ? "+" : ""}${percentFormat.format(delta)}pp</text></g>`;
-    });
-    node.innerHTML = `${svg}</svg>`;
-    bindChartInteractions(node, "fuel");
-  }
-
-  function renderShipScatter() {
-    const node = $("#shipScatter");
-    if (state.market !== "both") { node.innerHTML = '<div class="empty-state">切换到“投用＋订单”查看船型发展位置</div>'; return; }
-    const key = rawMetric();
-    $("#scatterUnit").textContent = state.metric === "gt" ? "横纵轴：万GT" : "横纵轴：艘";
-    const rows = shipRows().filter((row) => row.fleet[key] || row.order[key]);
-    if (!rows.length) { node.innerHTML = '<div class="empty-state">当前筛选没有船型记录</div>'; return; }
-    const width = 820, height = 430, left = 68, right = 24, top = 22, bottom = 48, plotWidth = width - left - right, plotHeight = height - top - bottom;
-    const xMax = Math.max(1, ...rows.map((row) => row.fleet[key])) * 1.08;
-    const yMax = Math.max(1, ...rows.map((row) => row.order[key])) * 1.08;
-    const sizeKey = key === "count" ? "gt" : "count";
-    const sizeMax = Math.max(1, ...rows.map((row) => row.fleet[sizeKey] + row.order[sizeKey]));
-    const topLabels = new Set([...rows].sort((a, b) => b.fleet[key] + b.order[key] - a.fleet[key] - a.order[key]).slice(0, 8).map((row) => row.label));
-    let svg = `<svg viewBox="0 0 ${width} ${height}" aria-hidden="true">`;
-    scaleTicks(xMax).forEach((tick) => { const x = left + tick / xMax * plotWidth; svg += `<line class="grid-line" x1="${x}" y1="${top}" x2="${x}" y2="${top + plotHeight}"></line><text class="chart-tick" x="${x}" y="${height - 22}" text-anchor="middle">${key === "gt" ? formatWan(tick) : numberFormat.format(Math.round(tick))}</text>`; });
-    scaleTicks(yMax).forEach((tick) => { const y = top + plotHeight - tick / yMax * plotHeight; svg += `<line class="grid-line" x1="${left}" y1="${y}" x2="${left + plotWidth}" y2="${y}"></line><text class="chart-tick" x="${left - 8}" y="${y + 3}" text-anchor="end">${key === "gt" ? formatWan(tick) : numberFormat.format(Math.round(tick))}</text>`; });
-    const commonMax = Math.min(xMax, yMax), refX2 = left + commonMax / xMax * plotWidth, refY2 = top + plotHeight - commonMax / yMax * plotHeight;
-    svg += `<line class="reference-line" x1="${left}" y1="${top + plotHeight}" x2="${refX2}" y2="${refY2}"></line><text class="chart-tick" x="${refX2 - 5}" y="${refY2 - 7}" text-anchor="end">订单＝投用</text>`;
-    rows.forEach((row) => {
-      const x = left + row.fleet[key] / xMax * plotWidth, y = top + plotHeight - row.order[key] / yMax * plotHeight, radius = 5 + Math.sqrt((row.fleet[sizeKey] + row.order[sizeKey]) / sizeMax) * 16;
-      const tipText = `${row.label}｜投用：${key === "gt" ? `${formatWan(row.fleet.gt)}万GT` : `${numberFormat.format(row.fleet.count)}艘`}；订单：${key === "gt" ? `${formatWan(row.order.gt)}万GT` : `${numberFormat.format(row.order.count)}艘`}`;
-      svg += `<g class="chart-hit" data-ship="${escapeHtml(row.label)}" data-tip="${escapeHtml(tipText)}"><circle class="bubble" cx="${x}" cy="${y}" r="${radius}"></circle>${topLabels.has(row.label) ? `<text class="chart-label" x="${x + radius + 4}" y="${y + 3}">${escapeHtml(row.label)}</text>` : ""}</g>`;
-    });
-    svg += `<text class="chart-label" x="${left + plotWidth / 2}" y="${height - 3}" text-anchor="middle">投用 ${key === "gt" ? "（万GT）" : "（艘）"}</text><text class="chart-label" x="13" y="${top + plotHeight / 2}" text-anchor="middle" transform="rotate(-90 13 ${top + plotHeight / 2})">订单 ${key === "gt" ? "（万GT）" : "（艘）"}</text></svg>`;
-    node.innerHTML = svg;
-    bindChartInteractions(node, "ship");
-  }
-
-  function renderShipRanking() {
-    const key = rawMetric();
-    const series = selectedMarkets();
-    const rows = shipRows().map((row) => ({ ...row, total: series.reduce((sum, market) => sum + row[market][key], 0) })).filter((row) => row.total > 0).sort((a, b) => b.total - a.total).slice(0, 10);
-    const max = Math.max(1, ...rows.map((row) => row.total));
-    $("#shipRanking").innerHTML = rows.length ? rows.map((row, index) => {
-      const fleetWidth = series.includes("fleet") ? row.fleet[key] / max * 100 : 0;
-      const orderWidth = series.includes("order") ? row.order[key] / max * 100 : 0;
-      const label = key === "gt" ? `${formatWan(row.total)}万` : numberFormat.format(Math.round(row.total));
-      return `<div class="rank-row" data-ship="${escapeHtml(row.label)}"><span>${index + 1}</span><label title="${escapeHtml(row.label)}">${escapeHtml(row.label)}</label><div class="rank-track"><i class="f" style="width:${fleetWidth}%"></i><i class="o" style="width:${orderWidth}%"></i></div><b>${label}</b></div>`;
-    }).join("") : '<div class="empty-state">当前筛选没有船型记录</div>';
-    $$(".rank-row", $("#shipRanking")).forEach((row) => row.addEventListener("click", () => selectShip(row.dataset.ship)));
-  }
-
-  function matrixData() {
-    const market = data.markets[state.matrixMarket], key = rawMetric();
-    let fuels = market.fuels.filter((fuel) => fuel[key] > 0);
-    if (state.fuel !== "all") fuels = fuels.filter((fuel) => fuel.key === state.fuel);
-    let ships = market.ships;
-    if (state.ship !== "all") ships = ships.filter((ship) => ship.label === state.ship);
-    ships = ships.map((ship) => ({ ...ship, values: fuels.map((fuel) => ship.fuels[fuel.key] || { count: 0, gt: 0 }) })).sort((a, b) => b[key] - a[key]);
-    return { market, fuels, ships, key };
+  function renderQuerySummary() {
+    const fleet = filteredSummary("fleet"), order = filteredSummary("order");
+    const label = [state.fuel === "all" ? null : fuelLabel(state.fuel), state.ship === "all" ? null : state.ship].filter(Boolean).join(" · ") || "全部替代燃料船舶";
+    const fleetCountShare = fleet.count / Math.max(1, data.markets.fleet.count);
+    const orderCountShare = order.count / Math.max(1, data.markets.order.count);
+    $("#querySummary").innerHTML = `<h3>${escapeHtml(label)}</h3><p>当前筛选结果</p><div class="result-totals">
+      <div class="result-item"><span>投用</span><strong>${numberFormat.format(fleet.count)}艘</strong><small>${formatWan(fleet.gt)}万GT · 占投用总量${formatPct(fleetCountShare)}</small></div>
+      <div class="result-item"><span>订单</span><strong>${numberFormat.format(order.count)}艘</strong><small>${formatWan(order.gt)}万GT · 占订单总量${formatPct(orderCountShare)}</small></div>
+    </div><div class="result-note">燃料筛选包含相关组合参与。船型总计按船舶去重，燃料类别之间可能重合。</div>`;
   }
 
   function renderMatrix() {
-    const { fuels, ships, key } = matrixData();
-    const topShips = ships.slice(0, 14);
-    const values = topShips.flatMap((ship) => ship.values.map((value) => state.matrixMode === "rowShare" ? (ship[key] ? value[key] / ship[key] * 100 : 0) : value[key]));
-    const max = Math.max(1, ...values);
-    const columns = `118px repeat(${Math.max(1, fuels.length)},minmax(58px,1fr))`;
-    let html = `<div class="heatmap" style="grid-template-columns:${columns}"><div class="heat-corner"></div>${fuels.map((fuel) => `<div class="heat-col">${escapeHtml(fuel.label)}</div>`).join("")}`;
-    topShips.forEach((ship) => {
+    const market = data.markets[state.matrixMarket];
+    const key = metricKey();
+    const fuels = market.fuels.filter((fuel) => fuel.count > 0 && fuel.key !== "other");
+    const ships = [...market.ships].sort((a, b) => b[key] - a[key]);
+    const matrixValues = ships.flatMap((ship) => fuels.map((fuel) => Number(ship.fuels[fuel.key]?.[key] || 0)));
+    const max = Math.max(...matrixValues, 1);
+    const columns = `132px repeat(${fuels.length},minmax(58px,1fr)) 78px`;
+    let html = `<div class="heat-corner">船型大类</div>${fuels.map((fuel) => `<div class="heat-col">${escapeHtml(fuel.label)}</div>`).join("")}<div class="heat-col">去重总计</div>`;
+    ships.forEach((ship) => {
       html += `<div class="heat-row">${escapeHtml(ship.label)}</div>`;
-      ship.values.forEach((value, index) => {
-        const shown = state.matrixMode === "rowShare" ? (ship[key] ? value[key] / ship[key] * 100 : 0) : value[key];
-        const ratio = shown / max, alpha = shown ? .08 + ratio * .85 : .025, color = ratio > .52 ? "#fff" : colors.ink;
-        const text = !shown ? "—" : state.matrixMode === "rowShare" ? `${percentFormat.format(shown)}%` : key === "gt" ? formatWan(shown) : numberFormat.format(Math.round(shown));
-        const tipText = `${ship.label} × ${fuels[index].label}：${key === "gt" ? `${formatWan(value.gt)}万GT` : `${numberFormat.format(value.count)}艘`}${state.matrixMode === "rowShare" ? `；船型内占比${percentFormat.format(shown)}%` : ""}`;
-        html += `<div class="heat-cell" data-tip="${escapeHtml(tipText)}" style="background:rgba(${state.matrixMarket === "fleet" ? "15,143,131" : "242,140,69"},${alpha});color:${color}">${text}</div>`;
+      fuels.forEach((fuel) => {
+        const raw = Number(ship.fuels[fuel.key]?.[key] || 0);
+        const displayed = state.matrixMode === "rowShare" ? raw / Math.max(1, ship[key]) : raw;
+        const alpha = raw ? .1 + .8 * raw / max : .025;
+        const text = state.matrixMode === "rowShare" ? `${percentFormat.format(displayed * 100)}%` : state.metric === "gt" ? formatWan(raw) : (raw ? numberFormat.format(raw) : "—");
+        html += `<div class="heat-cell" style="background:rgba(15,143,131,${alpha})" data-tip="${escapeHtml(`${ship.label} × ${fuel.label}｜${marketName(state.matrixMarket)} ${state.metric === "gt" ? `${formatWan(raw)}万GT` : `${numberFormat.format(raw)}艘`}`)}">${text}</div>`;
       });
+      html += `<div class="heat-cell" style="background:#e7efef" data-tip="${escapeHtml(`${ship.label}｜去重总计 ${state.metric === "gt" ? `${formatWan(ship.gt)}万GT` : `${numberFormat.format(ship.count)}艘`}`)}">${state.matrixMode === "rowShare" ? "100.0%" : state.metric === "gt" ? formatWan(ship.gt) : numberFormat.format(ship.count)}</div>`;
     });
-    $("#heatmap").innerHTML = fuels.length && ships.length ? `${html}</div>` : '<div class="empty-state">当前筛选没有矩阵数据</div>';
-    bindTooltips($("#heatmap"));
+    $("#heatmap").style.gridTemplateColumns = columns;
+    $("#heatmap").innerHTML = html;
+    renderMatrixTable(ships, fuels, key);
+  }
+
+  function renderMatrixTable(ships, fuels, key) {
     const head = `<thead><tr><th>船型大类</th>${fuels.map((fuel) => `<th>${escapeHtml(fuel.label)}</th>`).join("")}<th>去重总计</th></tr></thead>`;
-    const body = `<tbody>${ships.map((ship) => `<tr><td>${escapeHtml(ship.label)}</td>${ship.values.map((value) => `<td>${value[key] ? (key === "gt" ? formatWan(value.gt) : numberFormat.format(value.count)) : "—"}</td>`).join("")}<td class="total">${key === "gt" ? formatWan(ship.gt) : numberFormat.format(ship.count)}</td></tr>`).join("")}</tbody>`;
-    $("#matrixTable").innerHTML = `${head}${body}`;
+    const body = ships.map((ship) => `<tr><td>${escapeHtml(ship.label)}</td>${fuels.map((fuel) => { const value = Number(ship.fuels[fuel.key]?.[key] || 0); return `<td>${value ? (state.metric === "gt" ? formatWan(value) : numberFormat.format(value)) : "—"}</td>`; }).join("")}<td class="total">${state.metric === "gt" ? formatWan(ship.gt) : numberFormat.format(ship.count)}</td></tr>`).join("");
+    $("#matrixTable").innerHTML = `${head}<tbody>${body}</tbody>`;
   }
 
   function renderCombo() {
-    const groups = new Map();
-    for (const key of ["fleet", "order"]) {
-      data.markets[key].combinations.groups.forEach((group) => {
-        const item = groups.get(group.key) || { label: group.label, fleet: 0, order: 0 };
-        item[key] = group.count;
-        groups.set(group.key, item);
-      });
-    }
-    const rows = [...groups.values()].sort((a, b) => b.fleet + b.order - a.fleet - a.order);
-    const max = Math.max(1, ...rows.map((row) => row.fleet + row.order));
     const fleet = data.markets.fleet.combinations, order = data.markets.order.combinations;
-    $("#comboChart").innerHTML = `<div class="combo-summary"><div class="mini-kpi"><span>投用组合船</span><b>${numberFormat.format(fleet.count)}艘</b></div><div class="mini-kpi"><span>订单组合船</span><b>${numberFormat.format(order.count)}艘</b></div></div><div class="combo-list">${rows.map((row) => `<div class="combo-row"><label><span>${escapeHtml(row.label)}</span><span>${row.fleet} / ${row.order}</span></label><div class="combo-track"><i class="f" style="width:${row.fleet / max * 100}%"></i><i class="o" style="width:${row.order / max * 100}%"></i></div></div>`).join("")}</div><div class="battery-legend"><span><i class="fleet-dot"></i>投用</span><span><i class="order-dot"></i>订单</span><span>完整市场，不受筛选影响</span></div>`;
-  }
-
-  function renderBattery() {
-    $("#batteryChart").innerHTML = `<div class="battery-block">${["fleet", "order"].map((key) => {
-      const item = data.battery[key], pureShare = item.pure / item.count * 100, hybridShare = item.hybrid / item.count * 100;
-      return `<div class="battery-row"><div><h4>${marketName(key)}</h4><div><strong>${numberFormat.format(item.count)}艘</strong><small>${formatWan(item.gt)}万GT</small></div></div><div class="stacked-bar"><i class="pure" style="width:${pureShare}%">${percentFormat.format(pureShare)}%</i><i class="hybrid" style="width:${hybridShare}%">${percentFormat.format(hybridShare)}%</i></div><div class="battery-legend"><span><i class="pure"></i>纯电 ${numberFormat.format(item.pure)}艘</span><span><i class="hybrid"></i>混合动力 ${numberFormat.format(item.hybrid)}艘</span></div></div>`;
-    }).join("")}</div><div class="ready-note">${escapeHtml(data.battery.note)} 完整专项口径，不受页面筛选影响。</div>`;
+    const labels = [...new Set([...fleet.groups, ...order.groups].map((row) => row.label))];
+    const rows = labels.map((label) => ({ label, fleet: fleet.groups.find((row) => row.label === label)?.count || 0, order: order.groups.find((row) => row.label === label)?.count || 0 })).sort((a, b) => b.fleet + b.order - a.fleet - a.order);
+    const max = Math.max(...rows.map((row) => row.fleet + row.order), 1);
+    $("#comboChart").innerHTML = `<div class="combo-summary"><div class="mini-kpi"><span>投用组合船</span><b>${fleet.count}艘</b></div><div class="mini-kpi"><span>订单组合船</span><b>${order.count}艘</b></div></div><div class="combo-list">${rows.map((row) => `<div class="combo-row"><label><span>${escapeHtml(row.label)}</span><span>${row.fleet} / ${row.order}</span></label><div class="combo-track"><i class="f" style="width:${row.fleet / max * 100}%"></i><i class="o" style="width:${row.order / max * 100}%"></i></div></div>`).join("")}</div>`;
   }
 
   function renderReady() {
-    const fleet = data.ready.fleet, order = data.ready.order, maxCount = Math.max(fleet.count, order.count), maxGt = Math.max(fleet.gt, order.gt);
-    $("#readyChart").innerHTML = `<div class="ready-metrics"><div class="ready-metric"><span>订单 / 投用艘数比</span><b>${formatPercent(order.count / fleet.count)}</b></div><div class="ready-metric"><span>订单 / 投用GT比</span><b>${formatPercent(order.gt / fleet.gt)}</b></div></div><div class="ready-pair"><div class="ready-bar"><label><span>投用</span><b>${numberFormat.format(fleet.count)}艘</b></label><div class="track"><i style="width:${fleet.count / maxCount * 100}%"></i></div></div><div class="ready-bar"><label><span>订单</span><b>${numberFormat.format(order.count)}艘</b></label><div class="track"><i style="width:${order.count / maxCount * 100}%"></i></div></div><div class="ready-bar"><label><span>投用GT</span><b>${formatWan(fleet.gt)}万</b></label><div class="track"><i style="width:${fleet.gt / maxGt * 100}%"></i></div></div><div class="ready-bar"><label><span>订单GT</span><b>${formatWan(order.gt)}万</b></label><div class="track"><i style="width:${order.gt / maxGt * 100}%"></i></div></div></div><div class="ready-note">${escapeHtml(data.ready.note)} Ready与替代燃料能力不直接相加。</div>`;
+    const fleet = data.ready.fleet, order = data.ready.order;
+    const maxCount = Math.max(fleet.count, order.count), maxGt = Math.max(fleet.gt, order.gt);
+    $("#readyChart").innerHTML = `<div class="ready-metrics"><div class="ready-metric"><span>投用Ready</span><b>${numberFormat.format(fleet.count)}艘</b></div><div class="ready-metric"><span>订单Ready</span><b>${numberFormat.format(order.count)}艘</b></div></div><div class="ready-pair">
+      <div class="ready-bar"><label><span>投用艘数</span><b>${numberFormat.format(fleet.count)}</b></label><div class="track"><i style="width:${fleet.count / maxCount * 100}%"></i></div></div>
+      <div class="ready-bar"><label><span>订单艘数</span><b>${numberFormat.format(order.count)}</b></label><div class="track"><i style="width:${order.count / maxCount * 100}%"></i></div></div>
+      <div class="ready-bar"><label><span>投用总吨（GT）</span><b>${formatWan(fleet.gt)}万</b></label><div class="track"><i style="width:${fleet.gt / maxGt * 100}%"></i></div></div>
+      <div class="ready-bar"><label><span>订单总吨（GT）</span><b>${formatWan(order.gt)}万</b></label><div class="track"><i style="width:${order.gt / maxGt * 100}%"></i></div></div>
+    </div><div class="ready-note">${escapeHtml(data.ready.note)} Ready与替代燃料能力不直接相加。</div>`;
   }
 
-  function renderFilterStatus() {
-    const parts = [state.market === "both" ? "投用＋订单" : marketName(state.market), state.metric === "count" ? "艘数" : state.metric === "gt" ? "万GT" : "艘数占比", state.fuel === "all" ? "全部燃料" : fuelLabel(state.fuel), state.ship === "all" ? "全部船型" : state.ship];
-    $("#filterStatus").textContent = `当前视图：${parts.join(" · ")}`;
-  }
-
-  function renderAll() {
-    renderKpis(); renderInsights(); renderFuelComparison(); renderFuelShift(); renderShipScatter(); renderShipRanking(); renderMatrix(); renderFilterStatus(); syncControls(); updateUrl();
-  }
-
-  function syncControls() {
-    $$("#marketControl button").forEach((button) => button.classList.toggle("active", button.dataset.value === state.market));
-    $$("#metricControl button").forEach((button) => button.classList.toggle("active", button.dataset.value === state.metric));
-    $$("#matrixMarket button").forEach((button) => button.classList.toggle("active", button.dataset.value === state.matrixMarket));
-    $$("#matrixMode button").forEach((button) => button.classList.toggle("active", button.dataset.value === state.matrixMode));
+  function populateFilters() {
+    $("#fuelFilter").innerHTML = `<option value="all">全部燃料</option>${data.markets.fleet.fuels.filter((fuel) => fuel.count || fuelObject("order", fuel.key).count).map((fuel) => `<option value="${fuel.key}">${escapeHtml(fuel.label)}</option>`).join("")}`;
+    const ships = [...new Set([...data.markets.fleet.ships, ...data.markets.order.ships].map((ship) => ship.label))].sort((a, b) => a.localeCompare(b, "zh-CN"));
+    $("#shipFilter").innerHTML = `<option value="all">全部船型</option>${ships.map((ship) => `<option value="${escapeHtml(ship)}">${escapeHtml(ship)}</option>`).join("")}`;
     $("#fuelFilter").value = state.fuel;
     $("#shipFilter").value = state.ship;
   }
 
-  function selectFuel(value) { state.fuel = state.fuel === value ? "all" : value; renderAll(); }
-  function selectShip(value) { state.ship = state.ship === value ? "all" : value; renderAll(); }
-
-  function bindChartInteractions(node, type) {
-    bindTooltips(node);
-    $$(`[data-${type}]`, node).forEach((element) => element.addEventListener("click", () => type === "fuel" ? selectFuel(element.dataset.fuel) : selectShip(element.dataset.ship)));
+  function setSegment(container, value) {
+    $$(`#${container} button`).forEach((button) => button.classList.toggle("active", button.dataset.value === value));
   }
-
-  function bindTooltips(node) {
-    $$('[data-tip]', node).forEach((element) => {
-      element.addEventListener("pointerenter", (event) => showTooltip(element.dataset.tip, event));
-      element.addEventListener("pointermove", (event) => positionTooltip(event));
-      element.addEventListener("pointerleave", hideTooltip);
-    });
-  }
-
-  function showTooltip(text, event) {
-    const tooltip = $("#tooltip"), [title, ...rest] = text.split("｜");
-    tooltip.innerHTML = `<b>${escapeHtml(title)}</b><span>${escapeHtml(rest.join("｜"))}</span>`;
-    tooltip.classList.add("show"); positionTooltip(event);
-  }
-  function positionTooltip(event) {
-    const tooltip = $("#tooltip"), gap = 14, width = tooltip.offsetWidth || 220, height = tooltip.offsetHeight || 60;
-    const left = Math.min(window.innerWidth - width - 10, event.clientX + gap), top = Math.min(window.innerHeight - height - 10, event.clientY + gap);
-    tooltip.style.left = `${Math.max(10, left)}px`; tooltip.style.top = `${Math.max(10, top)}px`;
-  }
-  function hideTooltip() { $("#tooltip").classList.remove("show"); }
-
-  function populateFilters() {
-    const fuels = data.markets.fleet.fuels.filter((fuel) => fuel.count || data.markets.order.fuels.find((item) => item.key === fuel.key)?.count);
-    $("#fuelFilter").innerHTML = '<option value="all">全部燃料</option>' + fuels.map((fuel) => `<option value="${fuel.key}">${escapeHtml(fuel.label)}</option>`).join("");
-    const ships = [...new Set([...data.markets.fleet.ships, ...data.markets.order.ships].map((ship) => ship.label))].sort((a, b) => a.localeCompare(b, "zh-CN"));
-    $("#shipFilter").innerHTML = '<option value="all">全部船型</option>' + ships.map((ship) => `<option value="${escapeHtml(ship)}">${escapeHtml(ship)}</option>`).join("");
-  }
-
-  function bindControls() {
-    $$("#marketControl button").forEach((button) => button.addEventListener("click", () => { state.market = button.dataset.value; renderAll(); }));
-    $$("#metricControl button").forEach((button) => button.addEventListener("click", () => { state.metric = button.dataset.value; renderAll(); }));
-    $$("#matrixMarket button").forEach((button) => button.addEventListener("click", () => { state.matrixMarket = button.dataset.value; renderMatrix(); syncControls(); }));
-    $$("#matrixMode button").forEach((button) => button.addEventListener("click", () => { state.matrixMode = button.dataset.value; renderMatrix(); syncControls(); }));
-    $("#fuelFilter").addEventListener("change", (event) => { state.fuel = event.target.value; renderAll(); });
-    $("#shipFilter").addEventListener("change", (event) => { state.ship = event.target.value; renderAll(); });
-    $("#resetFilters").addEventListener("click", () => { Object.assign(state, { market: "both", metric: "count", fuel: "all", ship: "all", matrixMarket: "fleet", matrixMode: "absolute" }); renderAll(); toast("筛选已重置"); });
-    $("#exportCsv").addEventListener("click", exportCsv);
-  }
-
-  function exportCsv() {
-    const markets = selectedMarkets(), fuels = fuelRows(), rows = [];
-    for (const market of markets) {
-      const ships = shipRows();
-      for (const ship of ships) {
-        for (const fuel of fuels) {
-          const sourceShip = data.markets[market].ships.find((item) => item.label === ship.label);
-          const value = sourceShip?.fuels[fuel.key] || { count: 0, gt: 0 };
-          if (!value.count && !value.gt) continue;
-          rows.push([marketName(market), ship.label, fuel.label, value.count, value.gt, (value.gt / 10000).toFixed(4)]);
-        }
-      }
-    }
-    const csvRows = [["市场", "船型大类", "燃料", "艘数", "GT", "万GT"], ...rows];
-    const csv = "\ufeff" + csvRows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\r\n");
-    const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); link.download = `替代燃料船舶_${data.asOf}_${state.market}.csv`; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 500); toast("当前视图CSV已生成");
-  }
-
-  function toast(message) { const node = $("#toast"); node.textContent = message; node.classList.add("show"); clearTimeout(toast.timer); toast.timer = setTimeout(() => node.classList.remove("show"), 2200); }
 
   function updateUrl() {
-    const url = new URL(location.href); ["market", "metric", "fuel", "ship"].forEach((key) => state[key] === ({ market: "both", metric: "count", fuel: "all", ship: "all" })[key] ? url.searchParams.delete(key) : url.searchParams.set(key, state[key]));
+    const url = new URL(location.href);
+    const defaults = { market: "both", metric: "count", fuel: "all", ship: "all", topic: "lng" };
+    for (const key of Object.keys(defaults)) {
+      const value = state[key];
+      if (value === defaults[key]) url.searchParams.delete(key); else url.searchParams.set(key, value);
+    }
     history.replaceState(null, "", `${url.pathname}${url.search}${location.hash}`);
   }
 
-  function restoreUrl() {
+  function parseUrl() {
     const params = new URLSearchParams(location.search);
     if (["both", "fleet", "order"].includes(params.get("market"))) state.market = params.get("market");
-    if (["count", "gt", "share"].includes(params.get("metric"))) state.metric = params.get("metric");
+    if (["count", "gt"].includes(params.get("metric"))) state.metric = params.get("metric");
     if (params.get("fuel")) state.fuel = params.get("fuel");
     if (params.get("ship")) state.ship = params.get("ship");
+    if (["lng", "methanol", "battery", "other"].includes(params.get("topic"))) state.topic = params.get("topic");
+  }
+
+  function exportCsv() {
+    const rows = [["市场", "船型", "燃料筛选", "艘数", "总吨（GT）"]];
+    for (const market of selectedMarkets()) {
+      for (const row of databaseShipRows()) rows.push([marketName(market), row.label, state.fuel === "all" ? "全部燃料" : fuelLabel(state.fuel), row[market].count, row[market].gt]);
+    }
+    const csv = `\ufeff${rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n")}`;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `alternative-fuel-fleet-${data.asOf}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    showToast("当前查询结果已导出");
+  }
+
+  function showToast(message) {
+    const toast = $("#toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    window.clearTimeout(showToast.timer);
+    showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1800);
+  }
+
+  function bindTooltips() {
+    const tooltip = $("#tooltip");
+    document.addEventListener("pointerover", (event) => {
+      const target = event.target.closest("[data-tip]");
+      if (!target) return;
+      const [title, ...rest] = target.dataset.tip.split("｜");
+      tooltip.innerHTML = `<b>${escapeHtml(title)}</b><span>${escapeHtml(rest.join(" · "))}</span>`;
+      tooltip.classList.add("show");
+    });
+    document.addEventListener("pointermove", (event) => {
+      if (!tooltip.classList.contains("show")) return;
+      const x = Math.min(window.innerWidth - tooltip.offsetWidth - 12, event.clientX + 14);
+      const y = Math.min(window.innerHeight - tooltip.offsetHeight - 12, event.clientY + 14);
+      tooltip.style.left = `${Math.max(8, x)}px`;
+      tooltip.style.top = `${Math.max(8, y)}px`;
+    });
+    document.addEventListener("pointerout", (event) => { if (event.target.closest("[data-tip]")) tooltip.classList.remove("show"); });
+  }
+
+  function bindControls() {
+    $("#marketControl").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-value]"); if (!button) return;
+      state.market = button.dataset.value; setSegment("marketControl", state.market); renderDatabase();
+    });
+    $("#metricControl").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-value]"); if (!button) return;
+      state.metric = button.dataset.value; setSegment("metricControl", state.metric); renderDatabase();
+    });
+    $("#matrixMarket").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-value]"); if (!button) return;
+      state.matrixMarket = button.dataset.value; setSegment("matrixMarket", state.matrixMarket); renderMatrix();
+    });
+    $("#matrixMode").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-value]"); if (!button) return;
+      state.matrixMode = button.dataset.value; setSegment("matrixMode", state.matrixMode); renderMatrix();
+    });
+    $("#topicTabs").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-topic]"); if (!button) return;
+      state.topic = button.dataset.topic; renderTopic(); updateUrl();
+    });
+    $("#fuelFilter").addEventListener("change", (event) => { state.fuel = event.target.value; renderDatabase(); });
+    $("#shipFilter").addEventListener("change", (event) => { state.ship = event.target.value; renderDatabase(); });
+    $("#resetFilters").addEventListener("click", () => {
+      Object.assign(state, { market: "both", metric: "count", fuel: "all", ship: "all", matrixMarket: "fleet", matrixMode: "absolute" });
+      setSegment("marketControl", state.market); setSegment("metricControl", state.metric); setSegment("matrixMarket", state.matrixMarket); setSegment("matrixMode", state.matrixMode);
+      $("#fuelFilter").value = "all"; $("#shipFilter").value = "all"; renderDatabase(); showToast("数据库筛选已重置");
+    });
+    $("#exportCsv").addEventListener("click", exportCsv);
   }
 
   function bindNavigation() {
-    const links = $$(".main-nav a"), sections = links.map((link) => $(link.getAttribute("href"))).filter(Boolean);
+    const links = $$(".main-nav a");
+    const sections = links.map((link) => $(link.getAttribute("href"))).filter(Boolean);
     const observer = new IntersectionObserver((entries) => {
       const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (!visible) return;
       links.forEach((link) => link.classList.toggle("active", link.getAttribute("href") === `#${visible.target.id}`));
-    }, { rootMargin: "-35% 0px -55% 0px", threshold: [0, .25, .6] });
+    }, { rootMargin: "-20% 0px -65%", threshold: [0, .2, .6] });
     sections.forEach((section) => observer.observe(section));
   }
 
@@ -411,9 +453,21 @@
       const response = await fetch("data/latest.json", { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       data = await response.json();
-      restoreUrl(); populateFilters(); bindControls(); bindNavigation(); renderHero(); renderCombo(); renderBattery(); renderReady(); renderAll();
+      parseUrl();
+      renderHeader();
+      renderOverview();
+      populateFilters();
+      setSegment("marketControl", state.market); setSegment("metricControl", state.metric);
+      renderTopic();
+      renderDatabase();
+      renderCombo();
+      renderReady();
+      bindControls();
+      bindTooltips();
+      bindNavigation();
     } catch (error) {
-      document.querySelector("main").innerHTML = `<div class="loading-error shell"><b>数据加载失败</b><p>无法读取data/latest.json。请通过HTTP服务器或GitHub Pages访问页面。</p><code>${escapeHtml(error.message)}</code></div>`;
+      console.error(error);
+      $("#main").innerHTML = `<div class="loading-error shell"><b>数据加载失败</b><p>请通过HTTP服务访问页面，并确认data/latest.json可用。</p></div>`;
     }
   }
 

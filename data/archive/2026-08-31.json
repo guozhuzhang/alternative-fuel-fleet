@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "generated": "2026-09-27",
   "asOf": "2026-08-31",
   "source": "Clarksons Research WFR数据库",
@@ -1218,7 +1218,9 @@
     }
   },
   "globalShares": {
+    "fleetCount": 0.027,
     "fleetGt": 0.104,
+    "orderCount": 0.235,
     "orderGt": 0.412
   },
   "ready": {
@@ -1247,5 +1249,659 @@
       "hybrid": 517
     },
     "note": "电动船舶专项口径。纯电单列，其余电池动力归入混合动力。"
-  }
+  },
+  "trends": {
+    "periodStart": "2024-01",
+    "periodEnd": "2026-08",
+    "metric": "shareOfGlobalGt",
+    "series": [
+      {
+        "period": "2024-01",
+        "fleet": {
+          "methanolCount": 28,
+          "lngCount": 1053,
+          "otherCount": 649,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.054,
+          "totalGtShare": 0.063
+        },
+        "order": {
+          "methanolCount": 223,
+          "lngCount": 902,
+          "otherCount": 418,
+          "methanolGtShare": 0.093,
+          "lngGtShare": 0.369,
+          "totalGtShare": 0.503
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-02",
+        "fleet": {
+          "methanolCount": 29,
+          "lngCount": 1070,
+          "otherCount": 661,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.055,
+          "totalGtShare": 0.064
+        },
+        "order": {
+          "methanolCount": 229,
+          "lngCount": 892,
+          "otherCount": 448,
+          "methanolGtShare": 0.093,
+          "lngGtShare": 0.36,
+          "totalGtShare": 0.498
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-03",
+        "fleet": {
+          "methanolCount": 30,
+          "lngCount": 1085,
+          "otherCount": 685,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.056,
+          "totalGtShare": 0.065
+        },
+        "order": {
+          "methanolCount": 227,
+          "lngCount": 896,
+          "otherCount": 459,
+          "methanolGtShare": 0.091,
+          "lngGtShare": 0.359,
+          "totalGtShare": 0.495
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-04",
+        "fleet": {
+          "methanolCount": 30,
+          "lngCount": 1106,
+          "otherCount": 699,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.056,
+          "totalGtShare": 0.066
+        },
+        "order": {
+          "methanolCount": 228,
+          "lngCount": 910,
+          "otherCount": 483,
+          "methanolGtShare": 0.089,
+          "lngGtShare": 0.362,
+          "totalGtShare": 0.497
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-05",
+        "fleet": {
+          "methanolCount": 33,
+          "lngCount": 1123,
+          "otherCount": 734,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.057,
+          "totalGtShare": 0.067
+        },
+        "order": {
+          "methanolCount": 235,
+          "lngCount": 906,
+          "otherCount": 521,
+          "methanolGtShare": 0.09,
+          "lngGtShare": 0.36,
+          "totalGtShare": 0.498
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-06",
+        "fleet": {
+          "methanolCount": 34,
+          "lngCount": 1132,
+          "otherCount": 748,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.058,
+          "totalGtShare": 0.068
+        },
+        "order": {
+          "methanolCount": 242,
+          "lngCount": 907,
+          "otherCount": 530,
+          "methanolGtShare": 0.09,
+          "lngGtShare": 0.357,
+          "totalGtShare": 0.495
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-07",
+        "fleet": {
+          "methanolCount": 36,
+          "lngCount": 1157,
+          "otherCount": 758,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.059,
+          "totalGtShare": 0.069
+        },
+        "order": {
+          "methanolCount": 250,
+          "lngCount": 985,
+          "otherCount": 545,
+          "methanolGtShare": 0.088,
+          "lngGtShare": 0.374,
+          "totalGtShare": 0.509
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-08",
+        "fleet": {
+          "methanolCount": 39,
+          "lngCount": 1177,
+          "otherCount": 778,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.059,
+          "totalGtShare": 0.071
+        },
+        "order": {
+          "methanolCount": 262,
+          "lngCount": 988,
+          "otherCount": 566,
+          "methanolGtShare": 0.092,
+          "lngGtShare": 0.369,
+          "totalGtShare": 0.513
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-09",
+        "fleet": {
+          "methanolCount": 41,
+          "lngCount": 1200,
+          "otherCount": 788,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.06,
+          "totalGtShare": 0.072
+        },
+        "order": {
+          "methanolCount": 272,
+          "lngCount": 1018,
+          "otherCount": 573,
+          "methanolGtShare": 0.093,
+          "lngGtShare": 0.378,
+          "totalGtShare": 0.52
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-10",
+        "fleet": {
+          "methanolCount": 43,
+          "lngCount": 1220,
+          "otherCount": 811,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.061,
+          "totalGtShare": 0.073
+        },
+        "order": {
+          "methanolCount": 278,
+          "lngCount": 1020,
+          "otherCount": 585,
+          "methanolGtShare": 0.093,
+          "lngGtShare": 0.375,
+          "totalGtShare": 0.52
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-11",
+        "fleet": {
+          "methanolCount": 44,
+          "lngCount": 1248,
+          "otherCount": 827,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.062,
+          "totalGtShare": 0.074
+        },
+        "order": {
+          "methanolCount": 284,
+          "lngCount": 1042,
+          "otherCount": 611,
+          "methanolGtShare": 0.092,
+          "lngGtShare": 0.377,
+          "totalGtShare": 0.519
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2024-12",
+        "fleet": {
+          "methanolCount": 44,
+          "lngCount": 1279,
+          "otherCount": 847,
+          "methanolGtShare": 0.001,
+          "lngGtShare": 0.063,
+          "totalGtShare": 0.076
+        },
+        "order": {
+          "methanolCount": 301,
+          "lngCount": 1053,
+          "otherCount": 622,
+          "methanolGtShare": 0.094,
+          "lngGtShare": 0.379,
+          "totalGtShare": 0.526
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-01",
+        "fleet": {
+          "methanolCount": 51,
+          "lngCount": 1308,
+          "otherCount": 863,
+          "methanolGtShare": 0.002,
+          "lngGtShare": 0.065,
+          "totalGtShare": 0.077
+        },
+        "order": {
+          "methanolCount": 298,
+          "lngCount": 1031,
+          "otherCount": 647,
+          "methanolGtShare": 0.094,
+          "lngGtShare": 0.381,
+          "totalGtShare": 0.529
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-02",
+        "fleet": {
+          "methanolCount": 54,
+          "lngCount": 1329,
+          "otherCount": 878,
+          "methanolGtShare": 0.002,
+          "lngGtShare": 0.066,
+          "totalGtShare": 0.079
+        },
+        "order": {
+          "methanolCount": 304,
+          "lngCount": 1037,
+          "otherCount": 663,
+          "methanolGtShare": 0.094,
+          "lngGtShare": 0.378,
+          "totalGtShare": 0.526
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-03",
+        "fleet": {
+          "methanolCount": 55,
+          "lngCount": 1344,
+          "otherCount": 896,
+          "methanolGtShare": 0.002,
+          "lngGtShare": 0.066,
+          "totalGtShare": 0.08
+        },
+        "order": {
+          "methanolCount": 306,
+          "lngCount": 1042,
+          "otherCount": 664,
+          "methanolGtShare": 0.093,
+          "lngGtShare": 0.383,
+          "totalGtShare": 0.53
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-04",
+        "fleet": {
+          "methanolCount": 58,
+          "lngCount": 1372,
+          "otherCount": 926,
+          "methanolGtShare": 0.002,
+          "lngGtShare": 0.068,
+          "totalGtShare": 0.082
+        },
+        "order": {
+          "methanolCount": 335,
+          "lngCount": 1031,
+          "otherCount": 671,
+          "methanolGtShare": 0.103,
+          "lngGtShare": 0.374,
+          "totalGtShare": 0.53
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-05",
+        "fleet": {
+          "methanolCount": 63,
+          "lngCount": 1397,
+          "otherCount": 945,
+          "methanolGtShare": 0.002,
+          "lngGtShare": 0.069,
+          "totalGtShare": 0.083
+        },
+        "order": {
+          "methanolCount": 334,
+          "lngCount": 1020,
+          "otherCount": 683,
+          "methanolGtShare": 0.102,
+          "lngGtShare": 0.368,
+          "totalGtShare": 0.524
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-06",
+        "fleet": {
+          "methanolCount": 66,
+          "lngCount": 1421,
+          "otherCount": 966,
+          "methanolGtShare": 0.003,
+          "lngGtShare": 0.07,
+          "totalGtShare": 0.085
+        },
+        "order": {
+          "methanolCount": 344,
+          "lngCount": 1007,
+          "otherCount": 687,
+          "methanolGtShare": 0.106,
+          "lngGtShare": 0.364,
+          "totalGtShare": 0.523
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-07",
+        "fleet": {
+          "methanolCount": 72,
+          "lngCount": 1449,
+          "otherCount": 988,
+          "methanolGtShare": 0.003,
+          "lngGtShare": 0.071,
+          "totalGtShare": 0.086
+        },
+        "order": {
+          "methanolCount": 340,
+          "lngCount": 1003,
+          "otherCount": 691,
+          "methanolGtShare": 0.104,
+          "lngGtShare": 0.369,
+          "totalGtShare": 0.524
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-08",
+        "fleet": {
+          "methanolCount": 75,
+          "lngCount": 1471,
+          "otherCount": 1011,
+          "methanolGtShare": 0.003,
+          "lngGtShare": 0.072,
+          "totalGtShare": 0.088
+        },
+        "order": {
+          "methanolCount": 329,
+          "lngCount": 1000,
+          "otherCount": 692,
+          "methanolGtShare": 0.1,
+          "lngGtShare": 0.365,
+          "totalGtShare": 0.517
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-09",
+        "fleet": {
+          "methanolCount": 81,
+          "lngCount": 1490,
+          "otherCount": 1034,
+          "methanolGtShare": 0.003,
+          "lngGtShare": 0.073,
+          "totalGtShare": 0.089
+        },
+        "order": {
+          "methanolCount": 338,
+          "lngCount": 1000,
+          "otherCount": 685,
+          "methanolGtShare": 0.099,
+          "lngGtShare": 0.361,
+          "totalGtShare": 0.51
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-10",
+        "fleet": {
+          "methanolCount": 87,
+          "lngCount": 1515,
+          "otherCount": 1057,
+          "methanolGtShare": 0.004,
+          "lngGtShare": 0.074,
+          "totalGtShare": 0.091
+        },
+        "order": {
+          "methanolCount": 332,
+          "lngCount": 992,
+          "otherCount": 678,
+          "methanolGtShare": 0.095,
+          "lngGtShare": 0.356,
+          "totalGtShare": 0.499
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-11",
+        "fleet": {
+          "methanolCount": 94,
+          "lngCount": 1535,
+          "otherCount": 1063,
+          "methanolGtShare": 0.004,
+          "lngGtShare": 0.075,
+          "totalGtShare": 0.092
+        },
+        "order": {
+          "methanolCount": 321,
+          "lngCount": 1012,
+          "otherCount": 694,
+          "methanolGtShare": 0.088,
+          "lngGtShare": 0.356,
+          "totalGtShare": 0.492
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2025-12",
+        "fleet": {
+          "methanolCount": 108,
+          "lngCount": 1560,
+          "otherCount": 1088,
+          "methanolGtShare": 0.005,
+          "lngGtShare": 0.076,
+          "totalGtShare": 0.094
+        },
+        "order": {
+          "methanolCount": 323,
+          "lngCount": 1010,
+          "otherCount": 703,
+          "methanolGtShare": 0.083,
+          "lngGtShare": 0.343,
+          "totalGtShare": 0.47
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2026-01",
+        "fleet": {
+          "methanolCount": 119,
+          "lngCount": 1577,
+          "otherCount": 1119,
+          "methanolGtShare": 0.005,
+          "lngGtShare": 0.077,
+          "totalGtShare": 0.095
+        },
+        "order": {
+          "methanolCount": 312,
+          "lngCount": 1034,
+          "otherCount": 702,
+          "methanolGtShare": 0.08,
+          "lngGtShare": 0.348,
+          "totalGtShare": 0.471
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2026-02",
+        "fleet": {
+          "methanolCount": 126,
+          "lngCount": 1592,
+          "otherCount": 1139,
+          "methanolGtShare": 0.005,
+          "lngGtShare": 0.077,
+          "totalGtShare": 0.096
+        },
+        "order": {
+          "methanolCount": 300,
+          "lngCount": 1052,
+          "otherCount": 711,
+          "methanolGtShare": 0.076,
+          "lngGtShare": 0.34,
+          "totalGtShare": 0.459
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2026-03",
+        "fleet": {
+          "methanolCount": 132,
+          "lngCount": 1605,
+          "otherCount": 1158,
+          "methanolGtShare": 0.006,
+          "lngGtShare": 0.078,
+          "totalGtShare": 0.097
+        },
+        "order": {
+          "methanolCount": 299,
+          "lngCount": 1086,
+          "otherCount": 703,
+          "methanolGtShare": 0.074,
+          "lngGtShare": 0.337,
+          "totalGtShare": 0.451
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2026-04",
+        "fleet": {
+          "methanolCount": 139,
+          "lngCount": 1629,
+          "otherCount": 1177,
+          "methanolGtShare": 0.006,
+          "lngGtShare": 0.079,
+          "totalGtShare": 0.099
+        },
+        "order": {
+          "methanolCount": 289,
+          "lngCount": 1093,
+          "otherCount": 733,
+          "methanolGtShare": 0.071,
+          "lngGtShare": 0.329,
+          "totalGtShare": 0.442
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2026-05",
+        "fleet": {
+          "methanolCount": 147,
+          "lngCount": 1641,
+          "otherCount": 1198,
+          "methanolGtShare": 0.006,
+          "lngGtShare": 0.079,
+          "totalGtShare": 0.099
+        },
+        "order": {
+          "methanolCount": 290,
+          "lngCount": 1109,
+          "otherCount": 766,
+          "methanolGtShare": 0.07,
+          "lngGtShare": 0.326,
+          "totalGtShare": 0.44
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2026-06",
+        "fleet": {
+          "methanolCount": 163,
+          "lngCount": 1665,
+          "otherCount": 1246,
+          "methanolGtShare": 0.007,
+          "lngGtShare": 0.08,
+          "totalGtShare": 0.102
+        },
+        "order": {
+          "methanolCount": 273,
+          "lngCount": 1108,
+          "otherCount": 751,
+          "methanolGtShare": 0.064,
+          "lngGtShare": 0.314,
+          "totalGtShare": 0.421
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2026-07",
+        "fleet": {
+          "methanolCount": 170,
+          "lngCount": 1693,
+          "otherCount": 1266,
+          "methanolGtShare": 0.007,
+          "lngGtShare": 0.081,
+          "totalGtShare": 0.103
+        },
+        "order": {
+          "methanolCount": 275,
+          "lngCount": 1107,
+          "otherCount": 768,
+          "methanolGtShare": 0.064,
+          "lngGtShare": 0.309,
+          "totalGtShare": 0.416
+        },
+        "sourceVersion": "monthly-report-history"
+      },
+      {
+        "period": "2026-08",
+        "fleet": {
+          "methanolCount": 173,
+          "lngCount": 1710,
+          "otherCount": null,
+          "methanolGtShare": 0.007,
+          "lngGtShare": 0.082,
+          "totalGtShare": 0.104
+        },
+        "order": {
+          "methanolCount": 280,
+          "lngCount": 1138,
+          "otherCount": null,
+          "methanolGtShare": 0.06,
+          "lngGtShare": 0.311,
+          "totalGtShare": 0.412
+        },
+        "sourceVersion": "2026-08-31-reviewed"
+      }
+    ],
+    "note": "2024年1月至2026年7月来自月报连续序列，2026年8月采用已复核的WFR新口径数据。"
+  },
+  "topicOrder": [
+    "lng",
+    "methanol",
+    "battery",
+    "other"
+  ]
 }

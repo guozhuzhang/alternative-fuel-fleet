@@ -18,8 +18,9 @@ const check = (condition, message) => {
 
 const near = (left, right, tolerance = 1e-9) => Math.abs(left - right) <= tolerance;
 const sum = (rows, key) => rows.reduce((total, row) => total + Number(row[key] || 0), 0);
+const fuelCount = (marketKey, fuelKey) => snapshot.markets?.[marketKey]?.fuels?.find((fuel) => fuel.key === fuelKey)?.count;
 
-check(snapshot.schemaVersion >= 4, "schemaVersion 必须不低于 4");
+check(snapshot.schemaVersion >= 5, "schemaVersion 必须不低于 5");
 check(/^\d{4}-\d{2}-\d{2}$/.test(snapshot.asOf), "asOf 必须使用 YYYY-MM-DD");
 
 const augustBaseline = snapshot.asOf === "2026-08-31";
@@ -72,11 +73,25 @@ if (augustBaseline) {
 }
 
 const historyRows = Array.isArray(history) ? history : (history.series || history.snapshots);
-check(Array.isArray(historyRows) && historyRows.length >= 1, "history.json 至少需要一个快照");
+check(Array.isArray(historyRows) && historyRows.length >= 2, "history.json 至少需要两个连续月份");
 if (Array.isArray(historyRows)) {
-  const latest = historyRows.find((row) => row.asOf === snapshot.asOf);
-  check(Boolean(latest), "history.json 缺少 latest.json 对应日期");
-  if (latest) {
+  const latestPeriod = snapshot.asOf.slice(0, 7);
+  const latest = historyRows.find((row) => row.period === latestPeriod || row.asOf === snapshot.asOf);
+  check(Boolean(latest), "history.json 缺少 latest.json 对应月份");
+
+  for (let index = 1; index < historyRows.length; index += 1) {
+    check(String(historyRows[index - 1].period || historyRows[index - 1].asOf) < String(historyRows[index].period || historyRows[index].asOf), "history.json 月份必须严格递增且不重复");
+  }
+
+  if (latest?.period) {
+    check(history.metric === "shareOfGlobalGt", "history.json metric 必须为 shareOfGlobalGt");
+    check(near(latest.fleet.totalGtShare, snapshot.globalShares.fleetGt), "历史最新月份 Fleet GT 份额不一致");
+    check(near(latest.order.totalGtShare, snapshot.globalShares.orderGt), "历史最新月份 Orderbook GT 份额不一致");
+    check(latest.fleet.lngCount === fuelCount("fleet", "lng"), "历史最新月份 Fleet LNG 艘数不一致");
+    check(latest.order.lngCount === fuelCount("order", "lng"), "历史最新月份 Orderbook LNG 艘数不一致");
+    check(latest.fleet.methanolCount === fuelCount("fleet", "methanol"), "历史最新月份 Fleet 甲醇艘数不一致");
+    check(latest.order.methanolCount === fuelCount("order", "methanol"), "历史最新月份 Orderbook 甲醇艘数不一致");
+  } else if (latest) {
     check((latest.fleetCount ?? latest.markets?.fleet?.count) === snapshot.markets.fleet.count, "历史快照 Fleet 船数不一致");
     check((latest.orderCount ?? latest.markets?.order?.count) === snapshot.markets.order.count, "历史快照 Orderbook 船数不一致");
   }
