@@ -1,0 +1,1251 @@
+{
+  "schemaVersion": 4,
+  "generated": "2026-09-27",
+  "asOf": "2026-08-31",
+  "source": "Clarksons Research WFR数据库",
+  "attribution": "上海国际航运研究中心整理",
+  "scope": {
+    "alternativeFuelDetail": true,
+    "readyDetail": false,
+    "batteryDetail": true,
+    "rawVesselDataPublished": false
+  },
+  "markets": {
+    "fleet": {
+      "key": "fleet",
+      "label": "投用 Fleet",
+      "count": 3178,
+      "gt": 186137078,
+      "averageGt": 58570.509125236,
+      "fuels": [
+        {
+          "key": "lng",
+          "label": "LNG",
+          "count": 1710,
+          "gt": 146329923,
+          "singleCount": 1699,
+          "singleGt": 145309046,
+          "comboCount": 11,
+          "comboGt": 1020877
+        },
+        {
+          "key": "methanol",
+          "label": "甲醇",
+          "count": 173,
+          "gt": 12832242,
+          "singleCount": 169,
+          "singleGt": 12487889,
+          "comboCount": 4,
+          "comboGt": 344353
+        },
+        {
+          "key": "ammonia",
+          "label": "氨",
+          "count": 10,
+          "gt": 520466,
+          "singleCount": 10,
+          "singleGt": 520466,
+          "comboCount": 0,
+          "comboGt": 0
+        },
+        {
+          "key": "lpg",
+          "label": "LPG",
+          "count": 180,
+          "gt": 8062382,
+          "singleCount": 180,
+          "singleGt": 8062382,
+          "comboCount": 0,
+          "comboGt": 0
+        },
+        {
+          "key": "biofuel",
+          "label": "生物燃料",
+          "count": 233,
+          "gt": 10000824,
+          "singleCount": 227,
+          "singleGt": 9812674,
+          "comboCount": 6,
+          "comboGt": 188150
+        },
+        {
+          "key": "hydrogen",
+          "label": "氢",
+          "count": 27,
+          "gt": 965454,
+          "singleCount": 19,
+          "singleGt": 104273,
+          "comboCount": 8,
+          "comboGt": 861181
+        },
+        {
+          "key": "ethane",
+          "label": "乙烷",
+          "count": 54,
+          "gt": 2920826,
+          "singleCount": 54,
+          "singleGt": 2920826,
+          "comboCount": 0,
+          "comboGt": 0
+        },
+        {
+          "key": "ethanol",
+          "label": "乙醇",
+          "count": 4,
+          "gt": 344353,
+          "singleCount": 0,
+          "singleGt": 0,
+          "comboCount": 4,
+          "comboGt": 344353
+        },
+        {
+          "key": "nuclear",
+          "label": "核能",
+          "count": 11,
+          "gt": 284191,
+          "singleCount": 11,
+          "singleGt": 284191,
+          "comboCount": 0,
+          "comboGt": 0
+        },
+        {
+          "key": "other",
+          "label": "其他替代燃料",
+          "count": 0,
+          "gt": 0,
+          "singleCount": 0,
+          "singleGt": 0,
+          "comboCount": 0,
+          "comboGt": 0
+        }
+      ],
+      "ships": [
+        {
+          "key": "LNG运输船",
+          "label": "LNG运输船",
+          "count": 752,
+          "gt": 79130880,
+          "fuels": {
+            "lng": {
+              "count": 751,
+              "gt": 79034372
+            },
+            "biofuel": {
+              "count": 1,
+              "gt": 96508
+            }
+          }
+        },
+        {
+          "key": "集装箱船",
+          "label": "集装箱船",
+          "count": 412,
+          "gt": 45034247,
+          "fuels": {
+            "lng": {
+              "count": 254,
+              "gt": 29793627
+            },
+            "methanol": {
+              "count": 94,
+              "gt": 10391479
+            },
+            "biofuel": {
+              "count": 49,
+              "gt": 4770267
+            },
+            "ethanol": {
+              "count": 4,
+              "gt": 344353
+            }
+          }
+        },
+        {
+          "key": "海工船",
+          "label": "海工船",
+          "count": 296,
+          "gt": 1839896,
+          "fuels": {
+            "lng": {
+              "count": 38,
+              "gt": 246031
+            },
+            "biofuel": {
+              "count": 7,
+              "gt": 58338
+            },
+            "methanol": {
+              "count": 5,
+              "gt": 34102
+            },
+            "hydrogen": {
+              "count": 5,
+              "gt": 20061
+            },
+            "ammonia": {
+              "count": 2,
+              "gt": 7947
+            }
+          }
+        },
+        {
+          "key": "其他船舶",
+          "label": "其他船舶",
+          "count": 264,
+          "gt": 800482,
+          "fuels": {
+            "methanol": {
+              "count": 7,
+              "gt": 45129
+            },
+            "nuclear": {
+              "count": 10,
+              "gt": 245965
+            },
+            "biofuel": {
+              "count": 25,
+              "gt": 74475
+            },
+            "lng": {
+              "count": 59,
+              "gt": 233883
+            },
+            "hydrogen": {
+              "count": 11,
+              "gt": 6502
+            },
+            "ammonia": {
+              "count": 2,
+              "gt": 774
+            }
+          }
+        },
+        {
+          "key": "LPG运输船",
+          "label": "LPG运输船",
+          "count": 251,
+          "gt": 11232648,
+          "fuels": {
+            "ethane": {
+              "count": 54,
+              "gt": 2920826
+            },
+            "lpg": {
+              "count": 180,
+              "gt": 8062382
+            },
+            "biofuel": {
+              "count": 4,
+              "gt": 59092
+            },
+            "ammonia": {
+              "count": 2,
+              "gt": 59629
+            },
+            "lng": {
+              "count": 11,
+              "gt": 130719
+            }
+          }
+        },
+        {
+          "key": "大型客渡船",
+          "label": "大型客渡船",
+          "count": 232,
+          "gt": 2681776,
+          "fuels": {
+            "lng": {
+              "count": 71,
+              "gt": 1606681
+            },
+            "biofuel": {
+              "count": 27,
+              "gt": 202223
+            },
+            "methanol": {
+              "count": 3,
+              "gt": 112407
+            },
+            "hydrogen": {
+              "count": 1,
+              "gt": 2699
+            }
+          }
+        },
+        {
+          "key": "油轮",
+          "label": "油轮",
+          "count": 180,
+          "gt": 11593396,
+          "fuels": {
+            "lng": {
+              "count": 124,
+              "gt": 10015501
+            },
+            "methanol": {
+              "count": 26,
+              "gt": 810831
+            },
+            "biofuel": {
+              "count": 20,
+              "gt": 733462
+            }
+          }
+        },
+        {
+          "key": "汽车运输船",
+          "label": "汽车运输船",
+          "count": 177,
+          "gt": 12711831,
+          "fuels": {
+            "lng": {
+              "count": 154,
+              "gt": 11136569
+            },
+            "methanol": {
+              "count": 3,
+              "gt": 263336
+            },
+            "biofuel": {
+              "count": 14,
+              "gt": 750667
+            }
+          }
+        },
+        {
+          "key": "散货船",
+          "label": "散货船",
+          "count": 134,
+          "gt": 9512498,
+          "fuels": {
+            "lng": {
+              "count": 82,
+              "gt": 7089784
+            },
+            "ammonia": {
+              "count": 4,
+              "gt": 452116
+            },
+            "biofuel": {
+              "count": 32,
+              "gt": 1631656
+            },
+            "methanol": {
+              "count": 8,
+              "gt": 188844
+            },
+            "hydrogen": {
+              "count": 1,
+              "gt": 33044
+            }
+          }
+        },
+        {
+          "key": "化学品船",
+          "label": "化学品船",
+          "count": 127,
+          "gt": 1846736,
+          "fuels": {
+            "biofuel": {
+              "count": 12,
+              "gt": 182592
+            },
+            "lng": {
+              "count": 71,
+              "gt": 861437
+            },
+            "methanol": {
+              "count": 19,
+              "gt": 543044
+            }
+          }
+        },
+        {
+          "key": "小型客渡船",
+          "label": "小型客渡船",
+          "count": 123,
+          "gt": 147794,
+          "fuels": {
+            "lng": {
+              "count": 10,
+              "gt": 64032
+            },
+            "biofuel": {
+              "count": 7,
+              "gt": 10642
+            },
+            "hydrogen": {
+              "count": 2,
+              "gt": 448
+            }
+          }
+        },
+        {
+          "key": "杂货船",
+          "label": "杂货船",
+          "count": 73,
+          "gt": 353180,
+          "fuels": {
+            "biofuel": {
+              "count": 4,
+              "gt": 44064
+            },
+            "lng": {
+              "count": 7,
+              "gt": 34627
+            },
+            "methanol": {
+              "count": 1,
+              "gt": 1928
+            }
+          }
+        },
+        {
+          "key": "邮轮",
+          "label": "邮轮",
+          "count": 66,
+          "gt": 6652769,
+          "fuels": {
+            "lng": {
+              "count": 40,
+              "gt": 5083049
+            },
+            "hydrogen": {
+              "count": 6,
+              "gt": 893568
+            },
+            "methanol": {
+              "count": 2,
+              "gt": 349370
+            },
+            "biofuel": {
+              "count": 16,
+              "gt": 1154453
+            }
+          }
+        },
+        {
+          "key": "多用途船",
+          "label": "多用途船",
+          "count": 47,
+          "gt": 1020063,
+          "fuels": {
+            "lng": {
+              "count": 19,
+              "gt": 476923
+            },
+            "nuclear": {
+              "count": 1,
+              "gt": 38226
+            },
+            "biofuel": {
+              "count": 11,
+              "gt": 180485
+            },
+            "methanol": {
+              "count": 3,
+              "gt": 50013
+            }
+          }
+        },
+        {
+          "key": "滚装船",
+          "label": "滚装船",
+          "count": 44,
+          "gt": 1578882,
+          "fuels": {
+            "lng": {
+              "count": 19,
+              "gt": 522688
+            },
+            "biofuel": {
+              "count": 4,
+              "gt": 51900
+            },
+            "methanol": {
+              "count": 2,
+              "gt": 41759
+            },
+            "hydrogen": {
+              "count": 1,
+              "gt": 9132
+            }
+          }
+        }
+      ],
+      "types": [
+        {
+          "label": "LNG Carrier",
+          "count": 666,
+          "gt": 73821262
+        },
+        {
+          "label": "Fully Cellular Container",
+          "count": 412,
+          "gt": 45034247
+        },
+        {
+          "label": "Pass./Car Ferry",
+          "count": 216,
+          "gt": 2311396
+        },
+        {
+          "label": "LPG Carrier",
+          "count": 180,
+          "gt": 7750404
+        },
+        {
+          "label": "Pure Car Carrier",
+          "count": 177,
+          "gt": 12711831
+        },
+        {
+          "label": "Tug",
+          "count": 132,
+          "gt": 64940
+        },
+        {
+          "label": "Bulk Carrier",
+          "count": 118,
+          "gt": 9251669
+        },
+        {
+          "label": "PSV/Supply 4,000 DWT+",
+          "count": 84,
+          "gt": 384230
+        },
+        {
+          "label": "Passenger Vessel",
+          "count": 78,
+          "gt": 35302
+        },
+        {
+          "label": "Tanker",
+          "count": 71,
+          "gt": 7542164
+        },
+        {
+          "label": "General Cargo",
+          "count": 70,
+          "gt": 286559
+        },
+        {
+          "label": "Cruise Ship",
+          "count": 66,
+          "gt": 6652769
+        },
+        {
+          "label": "Construction Service Operations Vsl",
+          "count": 51,
+          "gt": 326773
+        },
+        {
+          "label": "Chemical Parcel Tanker",
+          "count": 50,
+          "gt": 606082
+        },
+        {
+          "label": "Chemical Bulk Tanker",
+          "count": 48,
+          "gt": 774517
+        },
+        {
+          "label": "Ethane/LPG",
+          "count": 47,
+          "gt": 2721862
+        },
+        {
+          "label": "Product Carrier",
+          "count": 44,
+          "gt": 2405564
+        },
+        {
+          "label": "LNG/Regasification",
+          "count": 42,
+          "gt": 4478725
+        },
+        {
+          "label": "Ro-Ro",
+          "count": 41,
+          "gt": 1497952
+        },
+        {
+          "label": "Passenger Catamaran Vessel",
+          "count": 32,
+          "gt": 20209
+        }
+      ],
+      "combinations": {
+        "count": 16,
+        "gt": 1365478,
+        "groups": [
+          {
+            "key": "lng+hydrogen",
+            "fuels": [
+              "lng",
+              "hydrogen"
+            ],
+            "label": "LNG + 氢",
+            "count": 7,
+            "gt": 860933
+          },
+          {
+            "key": "lng+biofuel",
+            "fuels": [
+              "lng",
+              "biofuel"
+            ],
+            "label": "LNG + 生物燃料",
+            "count": 4,
+            "gt": 159944
+          },
+          {
+            "key": "methanol+ethanol",
+            "fuels": [
+              "methanol",
+              "ethanol"
+            ],
+            "label": "甲醇 + 乙醇",
+            "count": 3,
+            "gt": 316395
+          },
+          {
+            "key": "methanol+biofuel+ethanol",
+            "fuels": [
+              "methanol",
+              "biofuel",
+              "ethanol"
+            ],
+            "label": "甲醇 + 生物燃料 + 乙醇",
+            "count": 1,
+            "gt": 27958
+          },
+          {
+            "key": "biofuel+hydrogen",
+            "fuels": [
+              "biofuel",
+              "hydrogen"
+            ],
+            "label": "生物燃料 + 氢",
+            "count": 1,
+            "gt": 248
+          }
+        ]
+      }
+    },
+    "order": {
+      "key": "order",
+      "label": "订单 Orderbook",
+      "count": 2181,
+      "gt": 172767377,
+      "averageGt": 79214.75332416323,
+      "fuels": [
+        {
+          "key": "lng",
+          "label": "LNG",
+          "count": 1138,
+          "gt": 130273250,
+          "singleCount": 1132,
+          "singleGt": 129127650,
+          "comboCount": 6,
+          "comboGt": 1145600
+        },
+        {
+          "key": "methanol",
+          "label": "甲醇",
+          "count": 280,
+          "gt": 25008387,
+          "singleCount": 264,
+          "singleGt": 23276808,
+          "comboCount": 16,
+          "comboGt": 1731579
+        },
+        {
+          "key": "ammonia",
+          "label": "氨",
+          "count": 45,
+          "gt": 2377207,
+          "singleCount": 45,
+          "singleGt": 2377207,
+          "comboCount": 0,
+          "comboGt": 0
+        },
+        {
+          "key": "lpg",
+          "label": "LPG",
+          "count": 184,
+          "gt": 8288676,
+          "singleCount": 184,
+          "singleGt": 8288676,
+          "comboCount": 0,
+          "comboGt": 0
+        },
+        {
+          "key": "biofuel",
+          "label": "生物燃料",
+          "count": 18,
+          "gt": 136399,
+          "singleCount": 14,
+          "singleGt": 47812,
+          "comboCount": 4,
+          "comboGt": 88587
+        },
+        {
+          "key": "hydrogen",
+          "label": "氢",
+          "count": 43,
+          "gt": 1870262,
+          "singleCount": 35,
+          "singleGt": 710662,
+          "comboCount": 8,
+          "comboGt": 1159600
+        },
+        {
+          "key": "ethane",
+          "label": "乙烷",
+          "count": 49,
+          "gt": 2402076,
+          "singleCount": 49,
+          "singleGt": 2402076,
+          "comboCount": 0,
+          "comboGt": 0
+        },
+        {
+          "key": "ethanol",
+          "label": "乙醇",
+          "count": 14,
+          "gt": 1656992,
+          "singleCount": 0,
+          "singleGt": 0,
+          "comboCount": 14,
+          "comboGt": 1656992
+        },
+        {
+          "key": "nuclear",
+          "label": "核能",
+          "count": 4,
+          "gt": 165080,
+          "singleCount": 4,
+          "singleGt": 165080,
+          "comboCount": 0,
+          "comboGt": 0
+        },
+        {
+          "key": "other",
+          "label": "其他替代燃料",
+          "count": 0,
+          "gt": 0,
+          "singleCount": 0,
+          "singleGt": 0,
+          "comboCount": 0,
+          "comboGt": 0
+        }
+      ],
+      "ships": [
+        {
+          "key": "集装箱船",
+          "label": "集装箱船",
+          "count": 646,
+          "gt": 90307899,
+          "fuels": {
+            "methanol": {
+              "count": 116,
+              "gt": 15740219
+            },
+            "lng": {
+              "count": 502,
+              "gt": 74042471
+            },
+            "ammonia": {
+              "count": 1,
+              "gt": 15111
+            },
+            "hydrogen": {
+              "count": 2,
+              "gt": 14116
+            }
+          }
+        },
+        {
+          "key": "LNG运输船",
+          "label": "LNG运输船",
+          "count": 332,
+          "gt": 33866438,
+          "fuels": {
+            "lng": {
+              "count": 332,
+              "gt": 33866438
+            }
+          }
+        },
+        {
+          "key": "LPG运输船",
+          "label": "LPG运输船",
+          "count": 254,
+          "gt": 11325147,
+          "fuels": {
+            "ethane": {
+              "count": 49,
+              "gt": 2402076
+            },
+            "lpg": {
+              "count": 184,
+              "gt": 8288676
+            },
+            "ammonia": {
+              "count": 20,
+              "gt": 624395
+            },
+            "lng": {
+              "count": 1,
+              "gt": 10000
+            }
+          }
+        },
+        {
+          "key": "海工船",
+          "label": "海工船",
+          "count": 172,
+          "gt": 1176263,
+          "fuels": {
+            "methanol": {
+              "count": 12,
+              "gt": 189808
+            },
+            "biofuel": {
+              "count": 2,
+              "gt": 74587
+            },
+            "hydrogen": {
+              "count": 4,
+              "gt": 28100
+            },
+            "lng": {
+              "count": 2,
+              "gt": 6313
+            }
+          }
+        },
+        {
+          "key": "汽车运输船",
+          "label": "汽车运输船",
+          "count": 153,
+          "gt": 9530799,
+          "fuels": {
+            "lng": {
+              "count": 130,
+              "gt": 8018449
+            },
+            "methanol": {
+              "count": 15,
+              "gt": 804306
+            },
+            "ammonia": {
+              "count": 4,
+              "gt": 336000
+            }
+          }
+        },
+        {
+          "key": "散货船",
+          "label": "散货船",
+          "count": 98,
+          "gt": 8230974,
+          "fuels": {
+            "methanol": {
+              "count": 60,
+              "gt": 5200685
+            },
+            "ethanol": {
+              "count": 14,
+              "gt": 1656992
+            },
+            "ammonia": {
+              "count": 13,
+              "gt": 1178914
+            },
+            "lng": {
+              "count": 23,
+              "gt": 1774875
+            }
+          }
+        },
+        {
+          "key": "其他船舶",
+          "label": "其他船舶",
+          "count": 94,
+          "gt": 570973,
+          "fuels": {
+            "nuclear": {
+              "count": 4,
+              "gt": 165080
+            },
+            "methanol": {
+              "count": 10,
+              "gt": 185735
+            },
+            "hydrogen": {
+              "count": 9,
+              "gt": 27966
+            },
+            "lng": {
+              "count": 11,
+              "gt": 104820
+            },
+            "biofuel": {
+              "count": 1,
+              "gt": 268
+            },
+            "ammonia": {
+              "count": 1,
+              "gt": 200
+            }
+          }
+        },
+        {
+          "key": "油轮",
+          "label": "油轮",
+          "count": 89,
+          "gt": 6788122,
+          "fuels": {
+            "lng": {
+              "count": 62,
+              "gt": 5144935
+            },
+            "methanol": {
+              "count": 17,
+              "gt": 1364755
+            },
+            "ammonia": {
+              "count": 3,
+              "gt": 185619
+            },
+            "biofuel": {
+              "count": 6,
+              "gt": 13344
+            }
+          }
+        },
+        {
+          "key": "杂货船",
+          "label": "杂货船",
+          "count": 76,
+          "gt": 542186,
+          "fuels": {
+            "methanol": {
+              "count": 16,
+              "gt": 187024
+            },
+            "hydrogen": {
+              "count": 7,
+              "gt": 32795
+            },
+            "ammonia": {
+              "count": 1,
+              "gt": 5454
+            },
+            "biofuel": {
+              "count": 1,
+              "gt": 4710
+            }
+          }
+        },
+        {
+          "key": "邮轮",
+          "label": "邮轮",
+          "count": 66,
+          "gt": 7353575,
+          "fuels": {
+            "lng": {
+              "count": 35,
+              "gt": 6100154
+            },
+            "hydrogen": {
+              "count": 18,
+              "gt": 1752900
+            },
+            "methanol": {
+              "count": 5,
+              "gt": 466600
+            }
+          }
+        },
+        {
+          "key": "大型客渡船",
+          "label": "大型客渡船",
+          "count": 65,
+          "gt": 1515208,
+          "fuels": {
+            "lng": {
+              "count": 12,
+              "gt": 606292
+            },
+            "methanol": {
+              "count": 9,
+              "gt": 586326
+            },
+            "biofuel": {
+              "count": 3,
+              "gt": 16000
+            },
+            "hydrogen": {
+              "count": 3,
+              "gt": 14385
+            }
+          }
+        },
+        {
+          "key": "化学品船",
+          "label": "化学品船",
+          "count": 57,
+          "gt": 597752,
+          "fuels": {
+            "methanol": {
+              "count": 11,
+              "gt": 164718
+            },
+            "lng": {
+              "count": 12,
+              "gt": 143508
+            },
+            "ammonia": {
+              "count": 2,
+              "gt": 31514
+            },
+            "biofuel": {
+              "count": 4,
+              "gt": 27304
+            }
+          }
+        },
+        {
+          "key": "小型客渡船",
+          "label": "小型客渡船",
+          "count": 35,
+          "gt": 90884,
+          "fuels": {
+            "lng": {
+              "count": 1,
+              "gt": 12000
+            },
+            "biofuel": {
+              "count": 1,
+              "gt": 186
+            }
+          }
+        },
+        {
+          "key": "多用途船",
+          "label": "多用途船",
+          "count": 30,
+          "gt": 485763,
+          "fuels": {
+            "lng": {
+              "count": 10,
+              "gt": 182011
+            },
+            "methanol": {
+              "count": 6,
+              "gt": 66461
+            }
+          }
+        },
+        {
+          "key": "滚装船",
+          "label": "滚装船",
+          "count": 14,
+          "gt": 385394,
+          "fuels": {
+            "lng": {
+              "count": 5,
+              "gt": 260984
+            },
+            "methanol": {
+              "count": 3,
+              "gt": 51750
+            }
+          }
+        }
+      ],
+      "types": [
+        {
+          "label": "Fully Cellular Container",
+          "count": 646,
+          "gt": 90307899
+        },
+        {
+          "label": "LNG Carrier",
+          "count": 282,
+          "gt": 32848427
+        },
+        {
+          "label": "Pure Car Carrier",
+          "count": 153,
+          "gt": 9530799
+        },
+        {
+          "label": "LPG Carrier",
+          "count": 127,
+          "gt": 4939186
+        },
+        {
+          "label": "Ammonia/LPG",
+          "count": 77,
+          "gt": 3973885
+        },
+        {
+          "label": "General Cargo",
+          "count": 76,
+          "gt": 542186
+        },
+        {
+          "label": "Bulk Carrier",
+          "count": 69,
+          "gt": 4411685
+        },
+        {
+          "label": "Cruise Ship",
+          "count": 66,
+          "gt": 7353575
+        },
+        {
+          "label": "PSV/Supply 4,000 DWT+",
+          "count": 50,
+          "gt": 226555
+        },
+        {
+          "label": "Pass./Car Ferry",
+          "count": 49,
+          "gt": 999061
+        },
+        {
+          "label": "LNG Bunkering Vessel",
+          "count": 48,
+          "gt": 775788
+        },
+        {
+          "label": "Tanker",
+          "count": 47,
+          "gt": 4819687
+        },
+        {
+          "label": "Ethane/LPG",
+          "count": 45,
+          "gt": 2273956
+        },
+        {
+          "label": "Tug",
+          "count": 45,
+          "gt": 20436
+        },
+        {
+          "label": "Product Carrier",
+          "count": 36,
+          "gt": 1856330
+        },
+        {
+          "label": "Multi-Purpose Support",
+          "count": 29,
+          "gt": 278304
+        },
+        {
+          "label": "Ore Carrier",
+          "count": 26,
+          "gt": 3734689
+        },
+        {
+          "label": "Construction Service Operations Vsl",
+          "count": 26,
+          "gt": 171205
+        },
+        {
+          "label": "Chemical Parcel Tanker",
+          "count": 22,
+          "gt": 213290
+        },
+        {
+          "label": "Chemical Unknown Carrier",
+          "count": 21,
+          "gt": 110539
+        }
+      ],
+      "combinations": {
+        "count": 24,
+        "gt": 2891179,
+        "groups": [
+          {
+            "key": "methanol+ethanol",
+            "fuels": [
+              "methanol",
+              "ethanol"
+            ],
+            "label": "甲醇 + 乙醇",
+            "count": 14,
+            "gt": 1656992
+          },
+          {
+            "key": "lng+hydrogen",
+            "fuels": [
+              "lng",
+              "hydrogen"
+            ],
+            "label": "LNG + 氢",
+            "count": 6,
+            "gt": 1145600
+          },
+          {
+            "key": "methanol+biofuel",
+            "fuels": [
+              "methanol",
+              "biofuel"
+            ],
+            "label": "甲醇 + 生物燃料",
+            "count": 2,
+            "gt": 74587
+          },
+          {
+            "key": "biofuel+hydrogen",
+            "fuels": [
+              "biofuel",
+              "hydrogen"
+            ],
+            "label": "生物燃料 + 氢",
+            "count": 2,
+            "gt": 14000
+          }
+        ]
+      }
+    }
+  },
+  "globalShares": {
+    "fleetGt": 0.104,
+    "orderGt": 0.412
+  },
+  "ready": {
+    "fleet": {
+      "count": 1566,
+      "gt": 115110000
+    },
+    "order": {
+      "count": 1350,
+      "gt": 85511500
+    },
+    "detailAvailable": false,
+    "note": "当前公开版采用2026年8月31日汇总数据，不使用7月逐船明细推演分类结构。"
+  },
+  "battery": {
+    "fleet": {
+      "count": 953,
+      "gt": 9050000,
+      "pure": 141,
+      "hybrid": 812
+    },
+    "order": {
+      "count": 567,
+      "gt": 10161000,
+      "pure": 50,
+      "hybrid": 517
+    },
+    "note": "电动船舶专项口径。纯电单列，其余电池动力归入混合动力。"
+  }
+}

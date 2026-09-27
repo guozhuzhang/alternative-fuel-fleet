@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "series": [
+    {
+      "asOf": "2026-08-31",
+      "fleetCount": 3178,
+      "fleetGt": 186137078,
+      "orderCount": 2181,
+      "orderGt": 172767377,
+      "readyFleetCount": 1566,
+      "readyOrderCount": 1350,
+      "batteryFleetCount": 953,
+      "batteryOrderCount": 567
+    }
+  ]
+}
